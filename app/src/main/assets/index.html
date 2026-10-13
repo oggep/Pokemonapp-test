@@ -1,0 +1,701 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Oskars Pokémonsamling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky tab bar, one view at a time; deep-sea palette taken from the Palafin card */
+:root{
+  --bg:#061826; --surface:#0b2436; --surface-2:#10304a; --line:#1d4560;
+  --fg:#e7f4f9; --muted:#8fb3c4; --aqua:#45cdf3; --aqua-soft:rgba(69,205,243,.14);
+  --coral:#ff5a92; --coral-soft:rgba(255,90,146,.15);
+  --nm:#3ddc97; --lp:#a8e05f; --mp:#f5c242; --hp:#f58a42; --dmg:#f25563;
+  --shadow:0 20px 50px rgba(0,0,0,.45);
+  --display:"Unbounded",system-ui,sans-serif; --body:"Figtree",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#eaf5f9; --surface:#ffffff; --surface-2:#f2f9fc; --line:#cde2eb;
+  --fg:#082332; --muted:#4c6c7d; --aqua:#0786b8; --aqua-soft:rgba(7,134,184,.10);
+  --coral:#cf2d66; --coral-soft:rgba(207,45,102,.10);
+  --nm:#169a62; --lp:#5e9a19; --mp:#b5850a; --hp:#c45f17; --dmg:#c9283a;
+  --shadow:0 18px 40px rgba(8,35,50,.14); color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#eaf5f9; --surface:#ffffff; --surface-2:#f2f9fc; --line:#cde2eb;
+  --fg:#082332; --muted:#4c6c7d; --aqua:#0786b8; --aqua-soft:rgba(7,134,184,.10);
+  --coral:#cf2d66; --coral-soft:rgba(207,45,102,.10);
+  --nm:#169a62; --lp:#5e9a19; --mp:#b5850a; --hp:#c45f17; --dmg:#c9283a;
+  --shadow:0 18px 40px rgba(8,35,50,.14); color-scheme:light}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+
+/* Nav */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;padding-block:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:800;font-size:16px;display:flex;align-items:center;gap:10px;margin-right:auto;text-decoration:none;color:var(--fg)}
+.brand i{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 12%,var(--aqua) 13% 60%,var(--coral) 61%);display:block}
+nav.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px;overflow-x:auto;max-width:100%}
+nav.tabs a{padding:7px 14px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;white-space:nowrap}
+nav.tabs a:hover{color:var(--fg)}
+nav.tabs a[aria-current="page"]{background:var(--aqua);color:var(--bg)}
+main section.view{padding-block:32px 64px}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center;padding-block:16px 40px}
+.hero h1{font-size:clamp(34px,5.6vw,64px);font-weight:800;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;color:var(--aqua)}
+.hero p.lede{color:var(--muted);font-size:17px;max-width:46ch;margin:18px 0 28px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;max-width:520px}
+.stat{background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.stat b{font-family:var(--display);font-size:26px;font-weight:700}
+.stat b.hl{color:var(--coral)}
+.stat span{font-size:13px;color:var(--muted)}
+.cardstage{perspective:1100px;display:flex;justify-content:center}
+.holo{position:relative;width:min(100%,380px);aspect-ratio:1062/1482;border-radius:4.6%/3.3%;overflow:hidden;box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.06);transform:rotateY(-10deg) rotateX(4deg) rotate(2deg);transition:transform .25s ease;transform-style:preserve-3d;max-width:100%}
+.holo img{width:100%;height:100%;display:block;object-fit:cover}
+.holo::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(120,230,255,.28) 45%,rgba(255,120,190,.22) 52%,transparent 66%);background-size:250% 250%;background-position:var(--gx,30%) var(--gy,30%);mix-blend-mode:screen;pointer-events:none}
+.cardstage .glow{position:absolute;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,var(--aqua-soft),transparent 70%);filter:blur(20px);z-index:-1}
+.cardcap{margin-top:14px;text-align:center;font-size:13px;color:var(--muted)}
+
+/* Panels */
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;min-width:0}
+.panel h2{font-size:17px;font-weight:700;margin-bottom:14px}
+.panel .sub{color:var(--muted);font-size:13px;margin:-8px 0 14px}
+.rows{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px}
+.rank .n{font-family:var(--mono);color:var(--muted);font-size:13px}
+.binder{display:block;text-decoration:none;color:inherit;border-radius:10px;padding:10px 8px;margin-inline:-8px}
+.binder:hover{background:var(--surface-2)}
+.bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;margin-top:6px}
+.bar > span{display:block;height:100%;background:var(--aqua);border-radius:3px}
+
+.pagehead{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:16px;margin-bottom:24px}
+.pagehead h1{font-size:clamp(26px,4vw,40px);font-weight:800}
+.pagehead p{color:var(--muted);margin:8px 0 0;max-width:60ch}
+
+/* Collection */
+.filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.filters input,.filters select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.resultbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;color:var(--muted);font-size:13.5px;margin-bottom:10px}
+.resultbar b{color:var(--fg)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:960px}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2);position:sticky;top:0}
+th.r,td.r{text-align:right}
+th button.sortbtn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;letter-spacing:inherit;text-transform:inherit;color:inherit;border-radius:4px}
+th button.sortbtn:hover{color:var(--fg)}
+th button.sortbtn:focus-visible{outline:2px solid var(--aqua);outline-offset:3px}
+th .arr{font-size:11px;opacity:.35;width:10px;display:inline-block;text-align:center}
+th[aria-sort="ascending"],th[aria-sort="descending"]{color:var(--aqua)}
+th[aria-sort="ascending"] .arr,th[aria-sort="descending"] .arr{opacity:1}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:0}
+td .t{font-weight:600}
+td .s{font-size:12.5px;color:var(--muted)}
+.star{color:var(--coral);margin-left:6px;font-size:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--aqua-soft);color:var(--aqua);white-space:nowrap}
+.cond{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.cond::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.c-NM{color:var(--nm)}.c-LP{color:var(--lp)}.c-MP{color:var(--mp)}.c-HP{color:var(--hp)}.c-DMG{color:var(--dmg)}
+.override{font-size:11px;color:var(--coral);display:block}
+.more{display:flex;justify-content:center;margin-top:16px}
+.btn{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 18px;font-weight:600;cursor:pointer}
+.btn:hover{border-color:var(--aqua)}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+.seg button{border:0;background:none;padding:7px 14px;border-radius:999px;font-weight:600;font-size:13.5px;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--aqua);color:var(--bg)}
+
+/* Charts */
+.hbars{display:flex;flex-direction:column;gap:8px}
+.hb{display:grid;grid-template-columns:minmax(0,200px) 52px minmax(0,1fr) 92px;gap:12px;align-items:center;font-size:13.5px;cursor:pointer;border-radius:8px;padding:3px 6px;margin-inline:-6px;background:none;border:0;text-align:left;width:calc(100% + 12px)}
+.hb:hover{background:var(--surface-2)}
+.hb .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb .track{height:18px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.hb .pc{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--aqua);font-weight:600}
+.hb .fill{display:block;height:100%;background:linear-gradient(90deg,var(--aqua),color-mix(in srgb,var(--aqua) 60%,var(--coral)));border-radius:5px;min-width:2px;transition:width .4s ease}
+.hb .v{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi b{display:block;font-family:var(--display);font-size:22px;margin-top:4px}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.stack{display:flex;height:42px;border-radius:12px;overflow:hidden;gap:2px;margin:6px 0 14px}
+.stack span{display:block;min-width:4px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px}
+.condtiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:20px}
+.ct{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;border-top:4px solid currentColor}
+.ct b{display:block;font-family:var(--display);font-size:24px;color:var(--fg)}
+.ct .nm{font-weight:700;font-size:13px}
+.ct small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.scale{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.6}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+
+/* Showcase / random picker */
+.show{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
+.slab{position:relative;margin:0 auto;width:min(100%,360px);background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.slab .label{display:flex;justify-content:space-between;gap:10px;align-items:start;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px}
+.slab .label b{display:block;font-size:13px}
+.slab .label .num{color:var(--muted)}
+.face{margin-top:12px;aspect-ratio:63/88;max-width:100%;border-radius:12px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:22px 20px;color:#fff;background:radial-gradient(120% 80% at 20% 10%,var(--t1),transparent 60%),radial-gradient(100% 90% at 90% 100%,var(--t2),transparent 60%),#0a1b2a}
+.face::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.18) 48%,transparent 60%);background-size:250% 250%;animation:sheen 5s ease-in-out infinite;pointer-events:none}
+@keyframes sheen{0%{background-position:100% 100%}50%{background-position:0 0}100%{background-position:100% 100%}}
+.face .tier{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.9}
+.face h2{font-size:clamp(26px,4.4vw,36px);font-weight:800;line-height:1.05;margin-top:8px;color:#fff;overflow-wrap:anywhere}
+.face .setline{font-size:14px;opacity:.85;margin-top:8px}
+.face .foot{display:flex;justify-content:space-between;align-items:end;gap:10px;font-family:var(--mono);font-size:13px}
+.face .foot b{font-family:var(--display);font-size:22px}
+.face.spin h2{filter:blur(1px);opacity:.75}
+.ctrls{display:flex;flex-direction:column;gap:16px}
+.ctrls .fl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ctrls label{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--muted);font-weight:600}
+.ctrls select,.ctrls input[type=number]{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--fg);font-weight:400;min-width:0}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px}
+.btn.primary{background:var(--aqua);color:var(--bg);border-color:var(--aqua);font-family:var(--display);font-size:15px;padding:13px 22px}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.pick[aria-pressed="true"]{background:var(--coral-soft);border-color:var(--coral);color:var(--coral)}
+.pool{font-size:13px;color:var(--muted)}
+.chosen{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px dashed var(--coral);background:var(--coral-soft);border-radius:14px;padding:12px 14px}
+.chosen .t{font-weight:700}
+.chosen .s{font-size:12.5px;color:var(--muted)}
+.hist .row{cursor:pointer}
+.hist .row:hover .t{color:var(--aqua)}
+
+/* Overlay: fixed dark stage in both themes */
+.ov{position:fixed;inset:0;z-index:50;background:radial-gradient(80% 60% at 50% 40%,rgba(18,60,90,.96),rgba(3,12,20,.98));color:#e7f4f9;display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));overflow:auto}
+.ovin{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:100%}
+.ovhint{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#8fb3c4;min-height:1.2em;text-align:center}
+.stage{display:flex;justify-content:center;max-width:100%}
+.ovres{text-align:center;min-height:3.2em}
+.ovres .ovtier{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#45cdf3;font-weight:700}
+.ovres .ovname{font-family:var(--display);font-size:clamp(24px,4vw,34px);font-weight:800;margin-top:4px}
+.ovres .ovsub{color:#b8d2de;font-size:15px;margin-top:4px}
+.ov .btn.primary{background:#45cdf3;border-color:#45cdf3;color:#061826}
+.wheelwrap{position:relative;max-width:100%}
+.wheelwrap canvas{display:block;max-width:100%;height:auto}
+.pointer{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:30px solid #ff5a92;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
+.packscene{position:relative;width:min(64vw,250px);aspect-ratio:63/88;margin-block:40px 10px}
+.pack{all:unset;cursor:pointer;position:absolute;inset:-8% -6%;display:block;transition:transform .6s ease,opacity .5s ease;z-index:2}
+.pack:focus-visible{outline:3px solid #45cdf3;outline-offset:6px;border-radius:10px}
+.pack:not(.torn):hover{transform:rotate(-2deg) scale(1.02)}
+.ptop,.pbody{position:absolute;left:0;right:0;background:linear-gradient(135deg,#c9e9f5,#45cdf3 25%,#2a6fd0 50%,#ff5a92 75%,#ffd66b);background-size:200% 200%;animation:foil 4s linear infinite}
+@keyframes foil{to{background-position:200% 200%}}
+.ptop{top:0;height:12%;border-radius:8px 8px 2px 2px;clip-path:polygon(0 0,100% 0,100% 80%,96% 100%,92% 80%,88% 100%,84% 80%,80% 100%,76% 80%,72% 100%,68% 80%,64% 100%,60% 80%,56% 100%,52% 80%,48% 100%,44% 80%,40% 100%,36% 80%,32% 100%,28% 80%,24% 100%,20% 80%,16% 100%,12% 80%,8% 100%,4% 80%,0 100%);transition:transform .6s cubic-bezier(.3,1.4,.5,1),opacity .6s}
+.pbody{top:10.5%;bottom:0;border-radius:2px 2px 10px 10px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:14px}
+.pbody img{position:absolute;inset:8% 10% 30%;width:80%;height:62%;object-fit:cover;object-position:50% 18%;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.pbrand{position:relative;font-family:var(--display);font-weight:800;font-size:20px;line-height:1;text-align:center;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5);text-transform:uppercase}
+.pset{position:relative;font-size:11px;color:#fff;opacity:.9;margin-top:6px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.pack.torn .ptop{transform:translate(60%,-140%) rotate(28deg);opacity:0}
+.pack.gone{transform:translateY(80%) scale(.9);opacity:0;pointer-events:none}
+.pcard{position:absolute;inset:0;z-index:1;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.9,.3,1.1);transform:translateY(10%) scale(.92)}
+.pcard.out{transform:translateY(-6%) scale(1)}
+.pcard.out.flip{transform:translateY(0) rotateY(180deg) scale(1.04)}
+.pback,.pfront{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;overflow:hidden}
+.pfront{transform:rotateY(180deg)}
+.pfront .face{margin:0;height:100%;width:100%}
+.pback{background:radial-gradient(circle at 50% 50%,#2a6fd0,#0a2a5a 70%);border:6px solid #e7c96a;display:flex;align-items:center;justify-content:center}
+.pback span{width:46%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffd66b 0 18%,#0a2a5a 19% 24%,#45cdf3 25% 60%,#0a2a5a 61%)}
+
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:min(560px,100%);margin-top:14px;min-height:28px}
+.chiphead{width:100%;text-align:center;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8fb3c4}
+.chip{font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--c);color:#e7f4f9}
+.ticket{width:min(92vw,420px);background:linear-gradient(160deg,#ffd66b,#ff8a4c 45%,#ff5a92);border-radius:18px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,.5);color:#2a0f1a}
+.thead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:2px 4px 12px}
+.thead b{font-family:var(--display);font-size:24px;font-weight:800}
+.thead span{font-size:12.5px;font-weight:700}
+.tgrid{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:rgba(255,255,255,.35);border-radius:14px;padding:8px}
+.tf{aspect-ratio:1;border-radius:10px;background:#fff8ef;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;text-align:center;border:2px solid transparent;transition:border-color .3s,transform .3s}
+.tf .tdot{width:14px;height:14px;border-radius:50%;background:var(--c)}
+.tf .tn{font-weight:700;font-size:13px;line-height:1.15;overflow-wrap:anywhere;color:#1b0a12}
+.tf .tp{font-size:11px;color:#6a4a52}
+.tf.win{border-color:#1f8a4c;background:#e4f8ec;transform:scale(1.04)}
+#scr{position:absolute;left:0;top:0;touch-action:none;cursor:crosshair;border-radius:14px}
+.tfoot{font-size:11px;font-weight:700;text-align:center;margin-top:10px;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+
+.ovbtns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.ov .btn.again{background:transparent;border:1px solid #45cdf3;color:#e7f4f9;font-family:var(--display);font-size:15px;padding:13px 22px}
+.ov .btn.again:hover{background:rgba(69,205,243,.12)}
+.ovx{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:16px;z-index:51;width:44px;height:44px;border-radius:50%;border:1px solid rgba(231,244,249,.3);background:rgba(255,255,255,.08);color:#e7f4f9;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ovx:hover{background:rgba(255,255,255,.18)}
+.histhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.histhead h2{margin-bottom:14px}
+.hc{font-family:var(--mono);font-size:13px;color:var(--muted);font-weight:400;margin-left:4px}
+.linkbtn{background:none;border:0;color:var(--aqua);font-weight:600;cursor:pointer;padding:4px}
+.histlist{max-height:420px;overflow-y:auto;padding-right:4px}
+.kept{font-size:11px;font-weight:700;color:var(--coral);background:var(--coral-soft);border-radius:999px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+.hbs{cursor:default}
+.hbs:hover{background:none}
+.hbs .lnk{all:unset;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:4px}
+.hbs .lnk:hover{color:var(--aqua)}
+.hbs .lnk:focus-visible,.stk .sg:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+.stk{display:flex;gap:1px;background:var(--surface-2)}
+.stk .sg{all:unset;display:block;height:100%;background:var(--muted);cursor:pointer;min-width:3px;transition:opacity .2s,filter .2s}
+.stk .sg:first-child{border-radius:5px 0 0 5px}.stk .sg:last-child{border-radius:0 5px 5px 0}.stk .sg:only-child{border-radius:5px}
+.stk .sg:hover{filter:brightness(1.15)}
+.stk .sg.c-NM{background:var(--nm)}.stk .sg.c-LP{background:var(--lp)}.stk .sg.c-MP{background:var(--mp)}.stk .sg.c-HP{background:var(--hp)}.stk .sg.c-DMG{background:var(--dmg)}
+.rargrid{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+@media (max-width:900px){.rargrid{grid-template-columns:1fr}}
+.stk .sg.dim{opacity:.28}
+.hbs .v .cv{font-weight:700}
+.seglab{font-size:12px;color:var(--muted);font-weight:600;padding:0 6px 0 10px;align-self:center}
+.rarctl{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+@media (max-width:900px){.rarctl{align-items:flex-start}}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;padding-block:20px}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:32px}
+  .cardstage{order:-1}
+  .holo{width:min(100%,300px)}
+  .grid3{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+  .filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .filters .q{grid-column:1/-1}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .condtiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .show{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .wrap{padding-inline:16px}
+  .hb{grid-template-columns:minmax(0,96px) 46px minmax(0,1fr) 72px;gap:6px}
+  .brand span{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <a class="brand" href="#start"><i></i><span>Oskars Pokémonsamling</span></a>
+  <nav class="tabs" aria-label="Sidor">
+    <a href="#start" data-v="start">Start</a>
+    <a href="#samling" data-v="samling">Samlingen</a>
+    <a href="#rarity" data-v="rarity">Rarity</a>
+    <a href="#condition" data-v="condition">Condition</a>
+    <a href="#slumpa" data-v="slumpa">Slumpa</a>
+  </nav>
+</div></header>
+
+<main>
+<!-- START -->
+<section class="view" id="v-start"><div class="wrap">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Marknadspris per 13 okt 2026</div>
+      <h1 style="margin-top:12px">Hela samlingen.<br><em>En pärm.</em></h1>
+      <p class="lede">Alla kort från PCn, EX SV MEG, Tradebinder och Extra bindern samlade på ett ställe, med värde, rarity och skick för varje kort.</p>
+      <div class="stats" id="heroStats"></div>
+    </div>
+    <div class="cardstage">
+      <div class="glow"></div>
+      <div>
+        <div class="holo" id="holo"><img src="palafin.webp" alt="Palafin-kort med Oskar som hjälte under vattnet" width="720" height="1005"></div>
+        <div class="cardcap">Palafin · 225/091 · <span id="palafinQty"></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="panel"><h2>Mest värdefulla</h2><p class="sub">Marknadsvärde per rad</p><div class="rows" id="topList"></div></div>
+    <div class="panel"><h2>Pärmar</h2><p class="sub">Klicka för att se pärmens kort</p><div class="rows" id="binders"></div></div>
+    <div class="panel"><h2>Senast tillagda</h2><p class="sub">Efter datum i exporten</p><div class="rows" id="recent"></div></div>
+  </div>
+</div></section>
+
+<!-- SAMLING -->
+<section class="view" id="v-samling" hidden><div class="wrap">
+  <div class="pagehead"><div><h1>Samlingen</h1><p>Sök och filtrera bland alla rader i exporten. Klicka på en kolumnrubrik för att sortera, klicka igen för att vända ordningen.</p></div></div>
+  <div class="filters">
+    <input class="q" id="fq" type="search" placeholder="Sök kort, set eller nummer…" aria-label="Sök">
+    <select id="fp" aria-label="Pärm"></select>
+    <select id="fr" aria-label="Rarity"></select>
+    <select id="fc" aria-label="Condition"></select>
+  </div>
+  <div class="resultbar"><span id="rcount"></span><span id="rvalue"></span></div>
+  <div class="tablewrap"><table>
+    <thead><tr id="sortRow"><th data-k="name">Kort</th><th data-k="set">Set</th><th data-k="no">Nr</th><th data-k="rarity">Rarity</th><th data-k="variant">Variant</th><th data-k="cond">Skick</th><th class="r" data-k="qty">Antal</th><th class="r" data-k="price">Styckpris</th><th class="r" data-k="value">Värde</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table></div>
+  <div class="more"><button class="btn" id="moreBtn" type="button">Visa fler</button></div>
+</div></section>
+
+<!-- RARITY -->
+<section class="view" id="v-rarity" hidden><div class="wrap">
+  <div class="pagehead">
+    <div><h1>Rarity</h1><p>Hur samlingen fördelar sig över raritetsnivåer. Klicka på en stapel för att se korten.</p></div>
+    <div class="rarctl"><div class="seg" id="rarSeg" role="group" aria-label="Mått"><button type="button" data-m="count" aria-pressed="true">Antal kort</button><button type="button" data-m="value" aria-pressed="false">Värde</button><button type="button" data-m="avg" aria-pressed="false">Snittpris</button><button type="button" data-m="cond" aria-pressed="false">Skick</button></div><div class="seg" id="condSeg" role="group" aria-label="Välj skick" hidden></div></div>
+  </div>
+  <div class="kpis" id="rarKpis"></div>
+  <div class="grid2 rargrid">
+    <div class="panel"><h2 id="rarChartTitle">Antal kort per rarity</h2><div class="legend" id="condLegendR" hidden style="margin:-4px 0 14px"></div><div class="hbars" id="rarBars"></div></div>
+    <div class="panel"><h2>Dyraste kortet per rarity</h2><div class="rows" id="rarTop"></div></div>
+  </div>
+</div></section>
+
+<!-- SLUMPA -->
+<section class="view" id="v-slumpa" hidden><div class="wrap">
+  <div class="pagehead"><div><h1>Slumpa ett kort</h1><p>Dra ett slumpat kort ur samlingen att ställa i one touch-hållaren på kontoret. Begränsa urvalet om du bara vill ha finare kort.</p></div></div>
+  <div class="show">
+    <div>
+      <div class="slab" id="slab">
+        <div class="label"><div><b id="sbName"></b><span id="sbSet"></span></div><span class="num" id="sbNo"></span></div>
+        <div class="face" id="face">
+          <div><div class="tier" id="fTier"></div><h2 id="fName"></h2><div class="setline" id="fSet"></div></div>
+          <div class="foot"><span id="fMeta"></span><b class="num" id="fPrice"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="ctrls">
+      <div class="panel">
+        <h2>Urval</h2>
+        <div class="fl">
+          <label for="rp">Pärm<select id="rp"></select></label>
+          <label for="rr">Rarity<select id="rr"></select></label>
+          <label for="rc">Skick<select id="rc"><option value="">Alla skick</option><option value="nm">Bara Near Mint</option></select></label>
+          <label for="rmin">Lägsta pris (kr)<input id="rmin" type="number" min="0" step="10" value="0" inputmode="numeric"></label>
+        </div>
+        <p class="pool" id="pool" style="margin:12px 0 0"></p>
+      </div>
+      <div class="seg" id="modeSeg" role="group" aria-label="Dragning" style="flex-wrap:wrap;border-radius:16px;align-self:flex-start">
+        <button type="button" data-mode="quick" aria-pressed="true">Snabb</button><button type="button" data-mode="wheel" aria-pressed="false">Lyckohjul</button><button type="button" data-mode="scratch" aria-pressed="false">Skraplott</button><button type="button" data-mode="pack" aria-pressed="false">Boosterpack</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="rollBtn" type="button">Slumpa kort</button>
+        <button class="btn pick" id="pickBtn" type="button" aria-pressed="false">Välj till one touch</button>
+      </div>
+      <div class="chosen" id="chosenBox" hidden><div style="min-width:0"><div class="s">I one touch-hållaren nu</div><div class="t" id="chosenName"></div><div class="s" id="chosenSet"></div></div><button class="btn" id="showChosen" type="button">Visa</button></div>
+      <div class="panel hist"><div class="histhead"><h2>Senast dragna <span id="histCount" class="hc"></span></h2><button class="linkbtn" id="histClear" type="button" hidden>Rensa</button></div><p class="sub">Alla dragna kort, även de du testade om. Klicka för att visa igen.</p><div class="rows histlist" id="hist"><p class="pool">Inga dragningar än.</p></div></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- CONDITION -->
+<section class="view" id="v-condition" hidden><div class="wrap">
+  <div class="pagehead"><div><h1>Condition</h1><p>Skicket på korten enligt TCG-skalan, från Near Mint till Damaged. Alla kort i exporten är ograderade.</p></div></div>
+  <div class="panel">
+    <h2>Fördelning av exemplar</h2>
+    <div class="stack" id="condStack"></div>
+    <div class="legend" id="condLegend"></div>
+    <div class="condtiles" id="condTiles"></div>
+    <p class="scale">NM = Near Mint · LP = Lightly Played · MP = Moderately Played · HP = Heavily Played · DMG = Damaged</p>
+  </div>
+  <div class="grid2" style="margin-top:20px">
+    <div class="panel"><h2>Kort som inte är Near Mint</h2><p class="sub" id="nonNmSub"></p><div class="rows" id="nonNm"></div></div>
+    <div class="panel"><h2>Skick per pärm</h2><p class="sub">Andel exemplar i Near Mint</p><div class="rows" id="condBinders"></div></div>
+  </div>
+</div></section>
+</main>
+<div class="ov" id="ov" hidden role="dialog" aria-modal="true" aria-label="Dragning">
+  <button class="ovx" id="ovX" type="button" aria-label="Stäng">×</button>
+  <div class="ovin"><div class="ovhint" id="ovHint"></div><div class="stage" id="stage"></div><div class="ovres" id="ovRes" aria-live="polite"></div><button class="btn primary" id="ovAct" type="button" hidden></button><div class="ovbtns"><button class="btn primary" id="ovClose" type="button" hidden>Lägg i ramen</button><button class="btn again" id="ovAgain" type="button" hidden>Testa igen</button></div></div>
+</div>
+<footer><div class="wrap">Källa: export från samlingsappen, marknadspris i SEK per 2026-10-13.</div></footer>
+
+<script>
+const RAW = [["EX SV MEG","30th Celebration","Espeon ex","070/128","Double Rare","Holofoil","Near Mint",1,6.53,0,0,"2026-10-09"],["EX SV MEG","Ascended Heroes","Erika's Vileplume ex","003/217","Double Rare","Holofoil","Near Mint",1,7.83,0,0,"2026-10-03"],["EX SV MEG","Ascended Heroes","Koraidon ex","121/217","Double Rare","Holofoil","Near Mint",1,7.73,0,0,"2026-03-12"],["EX SV MEG","Ascended Heroes","Larry's Dudunsparce ex","164/217","Double Rare","Holofoil","Near Mint",1,5.93,0,0,"2026-03-12"],["EX SV MEG","Ascended Heroes","Mandibuzz ex","139/217","Double Rare","Holofoil","Near Mint",1,6.03,0,0,"2026-03-12"],["EX SV MEG","Ascended Heroes","Mega Audino ex","172/217","Double Rare","Holofoil","Near Mint",1,8.74,0,0,"2026-03-12"],["EX SV MEG","Ascended Heroes","Mega Emboar ex","031/217","Double Rare","Holofoil","Near Mint",1,7.13,0,0,"2026-03-12"],["EX SV MEG","Ascended Heroes","Mega Feraligatr ex","043/217","Double Rare","Holofoil","Near Mint",1,10.14,0,0,"2026-07-14"],["EX SV MEG","Ascended Heroes","Mega Hawlucha ex","116/217","Double Rare","Holofoil","Near Mint",1,5.93,0,0,"2026-04-30"],["EX SV MEG","Ascended Heroes","Mega Scrafty ex","135/217","Double Rare","Holofoil","Near Mint",1,7.23,0,0,"2026-06-07"],["EX SV MEG","Ascended Heroes","Miraidon ex","073/217","Double Rare","Holofoil","Near Mint",1,6.73,0,0,"2026-03-12"],["EX SV MEG","Ascended Heroes","Regirock ex","107/217","Double Rare","Holofoil","Near Mint",1,5.62,0,0,"2026-03-12"],["EX SV MEG","Ascended Heroes","Registeel ex","145/217","Double Rare","Holofoil","Near Mint",1,7.03,0,0,"2026-06-07"],["EX SV MEG","Ascended Heroes","Voltorb ex","058/217","Double Rare","Holofoil","Near Mint",1,5.22,0,0,"2026-04-17"],["EX SV MEG","Black Bolt","Excadrill ex","046/086","Double Rare","Holofoil","Near Mint",1,4.72,0,0,"2026-03-12"],["EX SV MEG","Black Bolt","Genesect ex","067/086","Double Rare","Holofoil","Near Mint",1,12.35,0,0,"2026-03-12"],["EX SV MEG","Black Bolt","Kyurem ex","028/086","Double Rare","Holofoil","Near Mint",1,4.92,0,0,"2026-03-12"],["EX SV MEG","Black Bolt","Meloetta ex","044/086","Double Rare","Holofoil","Near Mint",1,6.13,0,0,"2026-03-12"],["EX SV MEG","Chaos Rising","Beedrill ex","003/086","Double Rare","Holofoil","Near Mint",1,7.83,0,0,"2026-08-09"],["EX SV MEG","Chaos Rising","Cobalion ex","064/086","Double Rare","Holofoil","Near Mint",1,5.22,0,0,"2026-08-21"],["EX SV MEG","Chaos Rising","Mega Pyroar ex","015/086","Double Rare","Holofoil","Near Mint",1,5.72,0,0,"2026-10-03"],["EX SV MEG","Destined Rivals","Arven's Mabosstiff ex","139/182","Double Rare","Holofoil","Near Mint",1,5.72,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Cetitan ex","065/182","Double Rare","Holofoil","Near Mint",1,5.72,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Cynthia's Garchomp ex","104/182","Double Rare","Holofoil","Near Mint",1,11.35,0,0,"2026-07-14"],["EX SV MEG","Destined Rivals","Dondozo ex","066/182","Double Rare","Holofoil","Near Mint",1,4.82,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Electivire ex","069/182","Double Rare","Holofoil","Near Mint",1,6.53,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Ethan's Ho-oh ex","039/182","Double Rare","Holofoil","Near Mint",1,8.54,0,0,"2026-07-14"],["EX SV MEG","Destined Rivals","Marnie's Grimmsnarl ex","136/182","Double Rare","Holofoil","Near Mint",1,7.63,0,0,"2026-08-11"],["EX SV MEG","Destined Rivals","Rabsca ex","025/182","Double Rare","Holofoil","Near Mint",1,5.02,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Regirock ex","101/182","Double Rare","Holofoil","Near Mint",1,5.52,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Steven's Metagross ex","145/182","Double Rare","Holofoil","Near Mint",1,8.84,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Team Rocket's Crobat ex","122/182","Double Rare","Holofoil","Near Mint",1,6.43,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Team Rocket's Mewtwo ex","081/182","Double Rare","Holofoil","Near Mint",1,16.77,0,0,"2026-07-14"],["EX SV MEG","Destined Rivals","Team Rocket's Persian ex","150/182","Double Rare","Holofoil","Near Mint",1,7.13,0,0,"2026-03-12"],["EX SV MEG","Destined Rivals","Yanmega ex","003/182","Double Rare","Holofoil","Near Mint",1,6.23,0,0,"2026-03-18"],["EX SV MEG","Journey Together","Alcremie ex","075/159","Double Rare","Holofoil","Near Mint",1,8.54,0,0,"2026-04-17"],["EX SV MEG","Journey Together","Iono's Bellibolt ex","053/159","Double Rare","Holofoil","Near Mint",1,5.52,0,0,"2026-03-12"],["EX SV MEG","Journey Together","Lillie's Clefairy ex","056/159","Double Rare","Holofoil","Near Mint",1,15.77,0,0,"2026-03-12"],["EX SV MEG","Journey Together","Paldean Clodsire ex","094/159","Double Rare","Holofoil","Near Mint",1,5.93,0,0,"2026-03-12"],["EX SV MEG","Journey Together","Reshiram ex","030/159","Double Rare","Holofoil","Near Mint",1,6.33,0,0,"2026-03-12"],["EX SV MEG","Journey Together","Salamence ex","114/159","Double Rare","Holofoil","Near Mint",1,6.53,0,0,"2026-03-12"],["EX SV MEG","Journey Together","Veluza ex","043/159","Double Rare","Holofoil","Near Mint",1,5.32,0,0,"2026-03-12"],["EX SV MEG","Journey Together","Volcanion ex","031/159","Double Rare","Holofoil","Near Mint",1,5.83,0,0,"2026-04-17"],["EX SV MEG","Mega Evolution","Mega Abomasnow ex","036/132","Double Rare","Holofoil","Near Mint",1,6.23,0,0,"2026-03-12"],["EX SV MEG","Mega Evolution","Mega Camerupt ex","022/132","Double Rare","Holofoil","Near Mint",1,6.63,0,0,"2026-03-12"],["EX SV MEG","Mega Evolution","Mega Gardevoir ex","060/132","Double Rare","Holofoil","Near Mint",1,6.33,0,0,"2026-07-14"],["EX SV MEG","Mega Evolution","Mega Kangaskhan ex","104/132","Double Rare","Holofoil","Near Mint",1,16.97,0,0,"2026-03-12"],["EX SV MEG","Mega Evolution","Mega Latias ex","100/132","Double Rare","Holofoil","Near Mint",1,5.83,0,0,"2026-03-12"],["EX SV MEG","Mega Evolution","Mega Lucario ex","077/132","Double Rare","Holofoil","Near Mint",1,8.74,0,0,"2026-03-12"],["EX SV MEG","Mega Evolution","Mega Manectric ex","050/132","Double Rare","Holofoil","Near Mint",1,6.03,0,0,"2026-03-12"],["EX SV MEG","Mega Evolution","Mega Mawile ex","094/132","Double Rare","Holofoil","Near Mint",1,6.03,0,0,"2026-03-12"],["EX SV MEG","Mega Evolution Promos","Mega Feraligatr ex","036","Promo","Holofoil","Near Mint",1,5.52,0,0,"2026-06-07"],["EX SV MEG","Mega Evolution Promos","Mega Latias ex","011","Promo","Holofoil","Near Mint",1,7.23,0,0,"2026-03-12"],["EX SV MEG","Obsidian Flames","Absol ex","135/197","Double Rare","Holofoil","Near Mint",1,11.81,0,1,"2026-03-12"],["EX SV MEG","Obsidian Flames","Clefable ex","082/197","Double Rare","Holofoil","Near Mint",1,11.93,0,0,"2026-03-12"],["EX SV MEG","Obsidian Flames","Decidueye ex","015/197","Double Rare","Holofoil","Near Mint",1,9.0,0,0,"2026-03-12"],["EX SV MEG","Obsidian Flames","Greedent ex","179/197","Double Rare","Holofoil","Near Mint",1,9.79,0,0,"2026-03-12"],["EX SV MEG","Obsidian Flames","Vespiquen ex","096/197","Double Rare","Holofoil","Near Mint",1,11.81,0,0,"2026-03-18"],["EX SV MEG","Paldea Evolved","Lycanroc ex","117/193","Double Rare","Holofoil","Near Mint",1,8.21,0,0,"2026-04-30"],["EX SV MEG","Paldea Evolved","Skeledirge ex","037/193","Double Rare","Holofoil","Near Mint",1,9.68,0,0,"2026-03-12"],["EX SV MEG","Paldea Evolved","Slowking ex","086/193","Double Rare","Holofoil","Near Mint",1,8.33,0,0,"2026-10-03"],["EX SV MEG","Paldea Evolved","Wo-Chien ex","027/193","Double Rare","Holofoil","Near Mint",1,7.54,0,0,"2026-03-12"],["EX SV MEG","Paldean Fates","Great Tusk ex","053/091","Double Rare","Holofoil","Near Mint",1,7.23,0,0,"2026-03-12"],["EX SV MEG","Paldean Fates","Iron Treads ex","066/091","Double Rare","Holofoil","Near Mint",1,4.72,0,0,"2026-03-12"],["EX SV MEG","Paldean Fates","Squawkabilly ex","075/091","Double Rare","Holofoil","Near Mint",1,5.32,0,0,"2026-03-12"],["EX SV MEG","Paldean Fates","Toedscruel ex","005/091","Double Rare","Holofoil","Near Mint",1,4.82,0,0,"2026-03-12"],["EX SV MEG","Paradox Rift","Aegislash ex","135/182","Double Rare","Holofoil","Near Mint",1,8.44,0,0,"2026-07-14"],["EX SV MEG","Paradox Rift","Altaria ex","140/182","Double Rare","Holofoil","Near Mint",1,9.04,0,0,"2026-03-17"],["EX SV MEG","Paradox Rift","Armarouge ex","027/182","Double Rare","Holofoil","Near Mint",1,9.44,0,0,"2026-03-12"],["EX SV MEG","Paradox Rift","Bombirdier ex","156/182","Double Rare","Holofoil","Near Mint",1,7.33,0,0,"2026-03-12"],["EX SV MEG","Paradox Rift","Gholdengo ex","139/182","Double Rare","Holofoil","Near Mint",1,9.04,0,0,"2026-03-12"],["EX SV MEG","Paradox Rift","Hoopa ex","098/182","Double Rare","Holofoil","Near Mint",1,8.74,0,0,"2026-03-12"],["EX SV MEG","Paradox Rift","Iron Hands ex","070/182","Double Rare","Holofoil","Near Mint",1,8.94,0,0,"2026-03-12"],["EX SV MEG","Paradox Rift","Maushold ex","155/182","Double Rare","Holofoil","Near Mint",1,16.17,0,0,"2026-03-12"],["EX SV MEG","Paradox Rift","Roaring Moon ex","124/182","Double Rare","Holofoil","Near Mint",1,8.54,0,0,"2026-03-12"],["EX SV MEG","Paradox Rift","Tsareena ex","046/182","Double Rare","Holofoil","Near Mint",1,5.72,0,0,"2026-03-12"],["EX SV MEG","Perfect Order","Mega Clefable ex","031/088","Double Rare","Holofoil","Near Mint",1,6.83,0,0,"2026-03-28"],["EX SV MEG","Perfect Order","Mega Skarmory ex","055/088","Double Rare","Holofoil","Near Mint",1,6.13,0,0,"2026-04-30"],["EX SV MEG","Perfect Order","Mega Zygarde ex","047/088","Double Rare","Holofoil","Near Mint",1,5.42,0,0,"2026-05-31"],["EX SV MEG","Perfect Order","Meowth ex","062/088","Double Rare","Holofoil","Near Mint",1,20.39,0,0,"2026-03-28"],["EX SV MEG","Perfect Order","Salazzle ex","016/088","Double Rare","Holofoil","Near Mint",1,6.03,0,0,"2026-08-21"],["EX SV MEG","Phantasmal Flames","Empoleon ex","070/094","Double Rare","Holofoil","Near Mint",1,6.63,0,0,"2026-03-12"],["EX SV MEG","Phantasmal Flames","Mega Diancie ex","041/094","Double Rare","Holofoil","Near Mint",1,5.42,0,0,"2026-03-12"],["EX SV MEG","Phantasmal Flames","Mega Heracross ex","004/094","Double Rare","Holofoil","Near Mint",1,6.43,0,0,"2026-03-12"],["EX SV MEG","Phantasmal Flames","Mega Lopunny ex","084/094","Double Rare","Holofoil","Near Mint",1,6.63,0,0,"2026-03-12"],["EX SV MEG","Phantasmal Flames","Mega Sharpedo ex","061/094","Double Rare","Holofoil","Near Mint",1,7.23,0,0,"2026-07-14"],["EX SV MEG","Phantasmal Flames","Mismagius ex","036/094","Double Rare","Holofoil","Near Mint",1,5.72,0,0,"2026-03-12"],["EX SV MEG","Phantasmal Flames","Oricorio ex","018/094","Double Rare","Holofoil","Near Mint",1,5.22,0,0,"2026-03-12"],["EX SV MEG","Phantasmal Flames","Rotom ex","029/094","Double Rare","Holofoil","Near Mint",1,5.32,0,0,"2026-03-12"],["EX SV MEG","Pitch Black","Lurantis ex","004/084","Double Rare","Holofoil","Near Mint",1,4.62,0,0,"2026-08-04"],["EX SV MEG","Pitch Black","Mega Delphox ex","008/084","Double Rare","Holofoil","Near Mint",1,5.52,0,0,"2026-07-27"],["EX SV MEG","Pitch Black","Mega Excadrill ex","065/084","Double Rare","Holofoil","Near Mint",1,6.43,0,0,"2026-09-05"],["EX SV MEG","Pitch Black","Mega Zeraora ex","027/084","Double Rare","Holofoil","Near Mint",1,5.22,0,0,"2026-08-04"],["EX SV MEG","Prismatic Evolutions","Dragapult ex","073/131","Double Rare","Holofoil","Near Mint",1,13.26,0,0,"2026-07-14"],["EX SV MEG","Prismatic Evolutions","Hearthflame Mask Ogerpon ex","017/131","Double Rare","Holofoil","Near Mint",1,6.43,0,0,"2026-03-12"],["EX SV MEG","Prismatic Evolutions","Iron Thorns ex","032/131","Double Rare","Holofoil","Near Mint",1,9.24,0,0,"2026-03-12"],["EX SV MEG","Prismatic Evolutions","Sandy Shocks ex","056/131","Double Rare","Holofoil","Near Mint",1,6.03,0,0,"2026-03-12"],["EX SV MEG","Prismatic Evolutions","Snorlax ex","076/131","Double Rare","Holofoil","Near Mint",1,19.89,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Base Set","Banette ex","088/198","Double Rare","Holofoil","Near Mint",1,7.54,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Base Set","Gardevoir ex","086/198","Double Rare","Holofoil","Near Mint",1,7.54,0,0,"2026-07-14"],["EX SV MEG","Scarlet & Violet Base Set","Iron Treads ex","143/198","Double Rare","Holofoil","Near Mint",1,6.08,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Base Set","Miraidon ex","081/198","Double Rare","Holofoil","Near Mint",1,8.33,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Base Set","Oinkologne ex","158/198","Double Rare","Holofoil","Near Mint",1,4.16,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Base Set","Spidops ex","019/198","Double Rare","Holofoil","Near Mint",1,6.08,0,0,"2026-04-17"],["EX SV MEG","Scarlet & Violet Base Set","Toxicroak ex","131/198","Double Rare","Holofoil","Near Mint",1,6.53,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Promo","Ampharos ex","016","Promo","Holofoil","Near Mint",1,44.39,0,0,"2026-04-30"],["EX SV MEG","Scarlet & Violet Promo","Annihilape ex","032","Promo","Holofoil","Near Mint",1,10.55,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Promo","Dialga ex","180","Promo","Holofoil","Near Mint",1,7.83,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Promo","Houndstone ex","162","Promo","Holofoil","Near Mint",1,7.43,0,0,"2026-04-17"],["EX SV MEG","Scarlet & Violet Promo","Kangaskhan ex","055","Promo","Holofoil","Near Mint",1,86.27,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Promo","Meowscarada ex","033","Promo","Holofoil","Near Mint",1,11.05,0,0,"2026-03-12"],["EX SV MEG","Scarlet & Violet Promo","Team Rocket's Mewtwo ex","205","Promo","Holofoil","Near Mint",1,23.2,0,0,"2026-03-12"],["EX SV MEG","Shrouded Fable","Kingdra ex","012/064","Double Rare","Holofoil","Near Mint",1,8.64,0,0,"2026-03-12"],["EX SV MEG","Shrouded Fable","Munkidori ex","037/064","Double Rare","Holofoil","Near Mint",1,6.23,0,0,"2026-03-12"],["EX SV MEG","Shrouded Fable","Revavroom ex","015/064","Double Rare","Holofoil","Near Mint",1,5.52,0,0,"2026-03-12"],["EX SV MEG","Stellar Crown","Cinderace ex","028/142","Double Rare","Holofoil","Near Mint",1,8.34,0,0,"2026-08-21"],["EX SV MEG","Stellar Crown","Dachsbun ex","067/142","Double Rare","Holofoil","Near Mint",1,14.56,0,0,"2026-03-15"],["EX SV MEG","Stellar Crown","Hydrapple ex","014/142","Double Rare","Holofoil","Near Mint",1,17.88,0,0,"2026-03-17"],["EX SV MEG","Stellar Crown","Lapras ex","032/142","Double Rare","Holofoil","Near Mint",1,19.08,0,0,"2026-03-12"],["EX SV MEG","Stellar Crown","Medicham ex","080/142","Double Rare","Holofoil","Near Mint",1,7.13,0,0,"2026-03-12"],["EX SV MEG","Stellar Crown","Melmetal ex","105/142","Double Rare","Holofoil","Near Mint",1,7.23,0,0,"2026-03-12"],["EX SV MEG","Stellar Crown","Orthworm ex","110/142","Double Rare","Holofoil","Near Mint",1,6.73,0,0,"2026-03-12"],["EX SV MEG","Stellar Crown","Terapagos ex","128/142","Double Rare","Holofoil","Near Mint",1,11.15,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Alolan Exeggutor ex","133/191","Double Rare","Holofoil","Near Mint",1,7.03,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Archaludon ex","130/191","Double Rare","Holofoil","Near Mint",1,5.62,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Black Kyurem ex","048/191","Double Rare","Holofoil","Near Mint",1,6.13,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Cyclizar ex","159/191","Double Rare","Holofoil","Near Mint",1,5.62,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Durant ex","004/191","Double Rare","Holofoil","Near Mint",1,5.32,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Flygon ex","106/191","Double Rare","Holofoil","Near Mint",1,5.02,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Kilowattrel ex","068/191","Double Rare","Holofoil","Near Mint",1,5.72,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Milotic ex","042/191","Double Rare","Holofoil","Near Mint",1,7.03,0,0,"2026-03-15"],["EX SV MEG","Surging Sparks","Palossand ex","091/191","Double Rare","Holofoil","Near Mint",1,6.43,0,0,"2026-03-12"],["EX SV MEG","Surging Sparks","Tatsugiri ex","142/191","Double Rare","Holofoil","Near Mint",1,6.83,0,0,"2026-03-15"],["EX SV MEG","SV: 151","Arbok ex","024/165","Double Rare","Holofoil","Near Mint",1,15.57,0,0,"2026-03-12"],["EX SV MEG","SV: 151","Golem ex","076/165","Double Rare","Holofoil","Near Mint",1,11.25,0,0,"2026-03-12"],["EX SV MEG","SV: 151","Jynx ex","124/165","Double Rare","Holofoil","Near Mint",1,14.06,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Farigiraf ex","108/162","Double Rare","Holofoil","Near Mint",1,7.33,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Gouging Fire ex","038/162","Double Rare","Holofoil","Near Mint",1,7.63,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Incineroar ex","034/162","Double Rare","Holofoil","Near Mint",1,8.54,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Iron Boulder ex","099/162","Double Rare","Holofoil","Near Mint",1,7.03,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Iron Crown ex","081/162","Double Rare","Holofoil","Near Mint",1,9.64,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Iron Leaves ex","025/162","Double Rare","Holofoil","Near Mint",1,9.34,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Koraidon ex","120/162","Double Rare","Holofoil","Near Mint",1,7.13,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Raging Bolt ex","123/162","Double Rare","Holofoil","Near Mint",1,13.06,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Torterra ex","012/162","Double Rare","Holofoil","Near Mint",1,8.34,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Walking Wake ex","050/162","Double Rare","Holofoil","Near Mint",1,7.63,0,0,"2026-03-12"],["EX SV MEG","Temporal Forces","Wugtrio ex","060/162","Double Rare","Holofoil","Near Mint",1,7.23,0,0,"2026-03-15"],["EX SV MEG","Trading Card Game Classic","Ho-oh","007/034","Classic Collection","Holofoil","Near Mint",1,8.03,0,0,"2026-04-30"],["EX SV MEG","Twilight Masquerade","Cornerstone Mask Ogerpon ex","112/167","Double Rare","Holofoil","Near Mint",1,8.44,0,0,"2026-03-12"],["EX SV MEG","Twilight Masquerade","Magcargo ex","029/167","Double Rare","Holofoil","Near Mint",1,5.32,0,0,"2026-03-12"],["EX SV MEG","Twilight Masquerade","Scream Tail ex","094/167","Double Rare","Holofoil","Near Mint",1,8.03,0,0,"2026-03-15"],["EX SV MEG","White Flare","Hydreigon ex","067/086","Double Rare","Holofoil","Near Mint",1,5.32,0,0,"2026-03-12"],["EX SV MEG","White Flare","Jellicent ex","045/086","Double Rare","Holofoil","Near Mint",1,6.33,0,0,"2026-03-12"],["EX SV MEG","White Flare","Keldeo ex","030/086","Double Rare","Holofoil","Near Mint",1,5.52,0,0,"2026-03-12"],["EX SV MEG","White Flare","Whimsicott ex","005/086","Double Rare","Holofoil","Near Mint",1,4.62,0,0,"2026-03-12"],["Extra bindern","Ascended Heroes","Charmander","020/217","Common","Normal","Near Mint",1,1.91,0,0,"2026-10-11"],["Extra bindern","Ascended Heroes","Erika's Tangela","007/217","Common","Normal","Near Mint",1,1.21,0,0,"2026-10-11"],["Extra bindern","Astral Radiance Trainer Gallery","Kleavor","TG08/TG30","Ultra Rare","Holofoil","Damaged",1,16.47,0,0,"2026-10-11"],["Extra bindern","Black Bolt","Axew (Poke Ball Pattern)","068/086","Common","Holofoil","Near Mint",1,3.31,0,0,"2026-10-11"],["Extra bindern","Black Bolt","Bisharp (Poke Ball Pattern)","065/086","Uncommon","Holofoil","Near Mint",1,4.12,0,0,"2026-10-11"],["Extra bindern","Black Bolt","Cobalion (Poke Ball Pattern)","066/086","Rare","Holofoil","Near Mint",1,5.32,0,0,"2026-10-11"],["Extra bindern","Black Bolt","Scolipede (Poke Ball Pattern)","056/086","Uncommon","Holofoil","Near Mint",1,5.93,0,0,"2026-10-11"],["Extra bindern","Black Bolt","Timburr (Poke Ball Pattern)","047/086","Common","Holofoil","Near Mint",1,3.31,0,0,"2026-10-11"],["Extra bindern","Fates Collide","Kingdra EX (Full Art)","122","Ultra Rare","Holofoil","Damaged",1,140.11,0,0,"2026-10-11"],["Extra bindern","Mega Evolution Promos","Binacle - 087 (Cosmos Holo)","087","Promo","Holofoil","Near Mint",1,2.11,0,0,"2026-10-11"],["Extra bindern","Mega Evolution Promos","Drifloon","005","Promo","Holofoil","Near Mint",1,33.24,0,0,"2026-10-11"],["Extra bindern","Mega Evolution Promos","Makuhita","068","Promo","Holofoil","Near Mint",1,2.61,0,0,"2026-10-11"],["Extra bindern","Mega Evolution Promos","Slowpoke - 086 (Cosmos Holo)","086","Promo","Holofoil","Near Mint",1,9.64,0,0,"2026-10-11"],["Extra bindern","Miscellaneous Cards & Products","Chimchar (Cosmos Holo)","076/130","Promo","Holofoil","Near Mint",1,260.43,0,0,"2026-10-11"],["Extra bindern","Phantasmal Flames","Gloom","002/094","Common","Normal","Near Mint",1,1.51,0,0,"2026-10-11"],["Extra bindern","Phantasmal Flames","Oddish","001/094","Common","Normal","Near Mint",1,1.21,0,0,"2026-10-11"],["Extra bindern","Phantasmal Flames","Vileplume","003/094","Rare","Holofoil","Near Mint",1,1.41,0,0,"2026-10-11"],["Extra bindern","Rebel Clash","Rillaboom VMAX","018/192","Ultra Rare","Holofoil","Moderately Played",1,18.06,0,0,"2026-10-11"],["Extra bindern","Scarlet & Violet Promo","Carvanha","093","Promo","Holofoil","Near Mint",1,3.52,0,0,"2026-10-11"],["Extra bindern","Scarlet & Violet Promo","Cyclizar","096","Promo","Holofoil","Near Mint",1,4.52,0,0,"2026-10-11"],["Extra bindern","Scarlet & Violet Promo","Eevee","043","Promo","Holofoil","Near Mint",1,60.26,0,0,"2026-10-11"],["Extra bindern","Scarlet & Violet Promo","Paldean Wooper","041","Promo","Holofoil","Near Mint",1,7.63,0,0,"2026-10-11"],["Extra bindern","Scarlet & Violet Promo","Shroodle","099","Promo","Holofoil","Near Mint",1,4.32,0,0,"2026-10-11"],["Extra bindern","Sun & Moon Promo","Gyarados GX","SM212","Promo","Holofoil","Heavily Played",1,19.22,0,1,"2026-10-11"],["Extra bindern","White Flare","Blitzle (Poke Ball Pattern)","031/086","Common","Holofoil","Near Mint",1,1.91,0,0,"2026-10-11"],["Extra bindern","White Flare","Joltik (Poke Ball Pattern)","030/086","Common","Holofoil","Near Mint",1,2.51,0,0,"2026-10-11"],["Extra bindern","White Flare","Trubbish (Master Ball Pattern)","059/086","Common","Holofoil","Near Mint",1,35.15,0,0,"2026-10-11"],["Extra bindern","White Flare","Zoroark (Poke Ball Pattern)","062/086","Rare","Holofoil","Near Mint",1,6.33,0,0,"2026-10-11"],["Extra bindern","XY Promos","M Beedrill EX","XY158","Promo","Holofoil","Damaged",1,111.68,0,0,"2026-10-11"],["Palafin","Paldean Fates","Palafin","225/091","Illustration Rare","Holofoil","Near Mint",23,18.08,0,0,"2026-10-11"],["Palafin","Shiny Treasure ex","Palafin (JP)","339/190","Art Rare","Holofoil","Near Mint",1,36.56,0,1,"2026-10-11"],["PCn","30th Celebration","Pikachu","041/128","Pikachu Rare","Holofoil","Near Mint",1,6.03,0,0,"2026-10-11"],["PCn","30th Celebration","Pikachu","029/128","Pikachu Rare","Holofoil","Near Mint",1,5.62,0,0,"2026-10-11"],["PCn","30th Celebration","Pikachu","049/128","Pikachu Rare","Holofoil","Near Mint",1,6.53,0,0,"2026-10-11"],["PCn","30th Celebration","Pikachu","034/128","Pikachu Rare","Holofoil","Near Mint",1,7.83,0,0,"2026-10-11"],["PCn","30th Celebration","Pikachu","040/128","Pikachu Rare","Holofoil","Near Mint",1,24.71,0,0,"2026-10-11"],["PCn","30th Celebration","Pikachu","051/128","Pikachu Rare","Holofoil","Near Mint",1,5.83,0,0,"2026-10-11"],["PCn","30th Celebration","Pikachu","033/128","Pikachu Rare","Holofoil","Near Mint",1,5.52,0,0,"2026-10-11"],["PCn","30th Celebration","Poke Pad","126/128","Common","Holofoil","Near Mint",1,2.81,0,0,"2026-10-11"],["PCn","30th Celebration","Switch","127/128","Common","Holofoil","Near Mint",1,2.31,0,0,"2026-10-11"],["PCn","30th Celebration","Umbreon ex","092/128","Double Rare","Holofoil","Near Mint",1,8.64,0,0,"2026-10-11"],["PCn","Abyss Eye","Mankey","040/081","Common","Normal","Near Mint",1,2.21,0,0,"2026-10-11"],["PCn","Abyss Eye","Morpeko ex","115/081","Special Art Rare","Holofoil","Near Mint",1,229.5,0,0,"2026-10-11"],["PCn","Alternate Art Promos","Darkrai GX","88a","Promo","Holofoil","Near Mint",1,203.68,0,0,"2026-10-11"],["PCn","Ancient Origins","M Sceptile EX","8","Ultra Rare","Holofoil","Lightly Played",1,316.76,0,0,"2026-10-11"],["PCn","Ancient Origins","M Tyranitar EX","43","Ultra Rare","Holofoil","Lightly Played",1,373.19,0,0,"2026-10-11"],["PCn","Ascended Heroes","Cynthia's Garchomp ex","111/217","Double Rare","Holofoil","Near Mint",1,7.73,0,0,"2026-10-11"],["PCn","Ascended Heroes","Dragapult ex","160/217","Double Rare","Holofoil","Near Mint",1,9.64,0,0,"2026-10-11"],["PCn","Ascended Heroes","Ethan's Ho-Oh ex","026/217","Double Rare","Holofoil","Near Mint",1,7.23,0,0,"2026-10-11"],["PCn","Ascended Heroes","Mega Audino ex","253/217","Ultra Rare","Holofoil","Near Mint",1,13.66,0,0,"2026-10-11"],["PCn","Ascended Heroes","Mega Gardevoir ex","089/217","Double Rare","Holofoil","Near Mint",1,7.43,0,0,"2026-10-11"],["PCn","Ascended Heroes","Mega Hawlucha ex","283/217","Special Illustration Rare","Holofoil","Lightly Played",1,345.49,0,0,"2026-10-11"],["PCn","Ascended Heroes","Mega Lucario ex","113/217","Double Rare","Holofoil","Near Mint",1,8.74,0,0,"2026-10-11"],["PCn","Ascended Heroes","Pikachu ex","057/217","Double Rare","Holofoil","Near Mint",1,35.25,0,0,"2026-10-11"],["PCn","Ascended Heroes","Team Rocket's Mewtwo ex","079/217","Double Rare","Holofoil","Near Mint",1,8.54,0,0,"2026-10-11"],["PCn","Astral Radiance","Darkrai V","098/189","Ultra Rare","Holofoil","Near Mint",1,20.25,0,0,"2026-10-11"],["PCn","Astral Radiance","Darkrai VSTAR","099/189","Ultra Rare","Holofoil","Near Mint",1,32.74,0,0,"2026-10-11"],["PCn","Astral Radiance","Machamp VMAX","073/189","Ultra Rare","Holofoil","Near Mint",1,38.71,0,0,"2026-10-11"],["PCn","Astral Radiance","Origin Forme Palkia VSTAR","208/189","Ultra Rare","Holofoil","Near Mint",1,182.28,0,0,"2026-10-11"],["PCn","Astral Radiance","Radiant Heatran","027/189","Radiant Rare","Holofoil","Near Mint",1,5.63,0,0,"2026-10-11"],["PCn","Astral Radiance Trainer Gallery","Galarian Articuno V","TG16/TG30","Ultra Rare","Holofoil","Near Mint",1,139.07,0,0,"2026-10-11"],["PCn","Astral Radiance Trainer Gallery","Kingdra","TG03/TG30","Ultra Rare","Holofoil","Near Mint",1,110.04,0,0,"2026-10-11"],["PCn","Black Bolt","Cryogonal","111/086","Illustration Rare","Holofoil","Near Mint",1,77.94,0,0,"2026-10-11"],["PCn","Black Bolt","Golurk","123/086","Illustration Rare","Holofoil","Near Mint",1,125.65,0,0,"2026-10-11"],["PCn","Black Bolt","Gurdurr","126/086","Illustration Rare","Holofoil","Near Mint",1,90.49,0,0,"2026-10-11"],["PCn","Black Bolt","N's Plan","170/086","Special Illustration Rare","Holofoil","Near Mint",1,615.17,0,0,"2026-10-11"],["PCn","Black Bolt","Serperior ex","156/086","Ultra Rare","Holofoil","Near Mint",1,12.65,0,0,"2026-10-11"],["PCn","Black Bolt","Zekrom ex","158/086","Ultra Rare","Holofoil","Near Mint",1,48.21,0,0,"2026-10-11"],["PCn","Black Bolt","Zekrom ex","034/086","Double Rare","Holofoil","Near Mint",1,5.62,0,0,"2026-10-11"],["PCn","BREAKthrough","M Houndoom EX","22","Ultra Rare","Holofoil","Moderately Played",1,162.36,0,0,"2026-10-11"],["PCn","Brilliant Stars","Arceus VSTAR (Secret)","184/172","Ultra Rare","Holofoil","Near Mint",1,145.04,0,0,"2026-10-11"],["PCn","Brilliant Stars","Charizard VSTAR","018/172","Ultra Rare","Holofoil","Near Mint",1,83.26,0,0,"2026-10-11"],["PCn","Brilliant Stars","Infernape","026/172","Holo Rare","Holofoil","Near Mint",1,2.48,0,0,"2026-10-11"],["PCn","Brilliant Stars Trainer Gallery","Rapid Strike Urshifu VMAX","TG21/TG30","Ultra Rare","Holofoil","Near Mint",1,124.89,0,0,"2026-10-11"],["PCn","Brilliant Stars Trainer Gallery","Single Strike Urshifu VMAX","TG19/TG30","Ultra Rare","Holofoil","Near Mint",1,80.9,0,0,"2026-10-11"],["PCn","Burning Shadows","Noivern GX","99/147","Ultra Rare","Holofoil","Moderately Played",1,15.87,0,0,"2026-10-11"],["PCn","Celebrations","Pikachu","005/025","Holo Rare","Holofoil","Moderately Played",1,38.49,0,0,"2026-10-11"],["PCn","Celebrations","Zacian V","016/025","Ultra Rare","Holofoil","Near Mint",1,6.03,0,1,"2026-10-11"],["PCn","Celebrations: Classic Collection","Reshiram","113/114","Classic Collection","Holofoil","Near Mint",1,147.44,0,0,"2026-10-11"],["PCn","Celebrations: Classic Collection","Team Magma's Groudon","9/95","Classic Collection","Holofoil","Near Mint",1,17.58,0,0,"2026-10-11"],["PCn","Celebrations: Classic Collection","Zekrom","114/114","Classic Collection","Holofoil","Near Mint",1,137.5,0,0,"2026-10-11"],["PCn","Chaos Rising","Crobat","093/086","Illustration Rare","Holofoil","Near Mint",1,17.27,0,0,"2026-10-11"],["PCn","Chaos Rising","Froakie","088/086","Illustration Rare","Holofoil","Near Mint",1,53.23,0,0,"2026-10-11"],["PCn","Chaos Rising","Mega Dragalge ex","104/086","Ultra Rare","Holofoil","Near Mint",1,23.4,0,0,"2026-10-11"],["PCn","Chaos Rising","Mega Gallade ex","048/086","Double Rare","Holofoil","Near Mint",1,6.63,0,0,"2026-10-11"],["PCn","Chaos Rising","Mega Greninja ex","022/086","Double Rare","Holofoil","Near Mint",1,9.34,0,0,"2026-10-11"],["PCn","Chilling Reign","Blaziken VMAX","021/198","Ultra Rare","Holofoil","Near Mint",1,40.28,0,0,"2026-10-11"],["PCn","Cosmic Eclipse","Excadrill (Secret)","246/236","Secret Rare","Holofoil","Lightly Played",1,42.18,0,0,"2026-10-11"],["PCn","Crown Zenith","Radiant Charjabug","051/159","Radiant Rare","Holofoil","Near Mint",1,5.29,0,0,"2026-10-11"],["PCn","Crown Zenith","Radiant Eternatus","105/159","Radiant Rare","Holofoil","Near Mint",1,7.99,0,0,"2026-10-11"],["PCn","Crown Zenith","Rayquaza V","100/159","Ultra Rare","Holofoil","Near Mint",1,28.13,0,0,"2026-10-11"],["PCn","Crown Zenith","Rayquaza VMAX","101/159","Ultra Rare","Holofoil","Near Mint",1,147.17,0,0,"2026-10-11"],["PCn","Crown Zenith: Galarian Gallery","Absol","GG16/GG70","Holo Rare","Holofoil","Near Mint",1,101.83,0,0,"2026-10-11"],["PCn","Crown Zenith: Galarian Gallery","Electivire","GG08/GG70","Holo Rare","Holofoil","Near Mint",1,92.94,0,0,"2026-10-11"],["PCn","Crown Zenith: Galarian Gallery","Hisuian Samurott VSTAR","GG52/GG70","Ultra Rare","Holofoil","Near Mint",1,166.64,0,0,"2026-10-11"],["PCn","Deck Exclusives","Latios (Holo)","022/110","Holo Rare","Holofoil","Near Mint",1,1032.48,0,0,"2026-10-11"],["PCn","Destined Rivals","Blaziken","192/182","Illustration Rare","Holofoil","Near Mint",1,67.59,0,0,"2026-10-11"],["PCn","Destined Rivals","Smoliv","021/182","Common","Normal","Near Mint",1,2.21,0,0,"2026-10-11"],["PCn","Destined Rivals","Team Rocket's Golbat","121/182","Uncommon","Normal","Near Mint",1,2.01,0,0,"2026-10-11"],["PCn","Destined Rivals","Team Rocket's Murkrow","200/182","Illustration Rare","Holofoil","Near Mint",1,53.63,0,0,"2026-10-11"],["PCn","Destined Rivals","Zamazenta","201/182","Illustration Rare","Holofoil","Near Mint",1,40.68,0,0,"2026-10-11"],["PCn","Diamond and Pearl Promos","Infernape Lv.X","DP10","Holo Rare","Holofoil","Moderately Played",1,729.54,400,0,"2026-10-11"],["PCn","Evolutions","M Pidgeot EX","65/108","Ultra Rare","Holofoil","Near Mint",1,63.8,0,0,"2026-10-11"],["PCn","Evolutions","M Slowbro EX","27/108","Ultra Rare","Holofoil","Lightly Played",1,65.42,0,0,"2026-10-11"],["PCn","Evolutions","M Venusaur EX","2/108","Ultra Rare","Holofoil","Near Mint",1,162.03,0,0,"2026-10-11"],["PCn","Evolving Skies","Gyarados VMAX","029/203","Ultra Rare","Holofoil","Near Mint",1,64.59,0,0,"2026-10-11"],["PCn","Evolving Skies","Rayquaza VMAX","111/203","Ultra Rare","Holofoil","Near Mint",1,145.82,0,0,"2026-10-11"],["PCn","Forbidden Light","Dialga GX","82","Ultra Rare","Holofoil","Lightly Played",1,122.99,0,0,"2026-10-11"],["PCn","Furious Fists","M Lucario EX (Secret)","113","Secret Rare","Holofoil","Moderately Played",1,610.21,0,0,"2026-10-11"],["PCn","Generations","M Blastoise EX","18","Ultra Rare","Holofoil","Near Mint",1,196.68,0,0,"2026-10-11"],["PCn","Guardians Rising","Turtonator GX","18/145","Ultra Rare","Holofoil","Lightly Played",1,13.29,0,0,"2026-10-11"],["PCn","Hidden Fates: Shiny Vault","Lycanroc GX (SV67)","SV67/SV94","Shiny Holo Rare","Holofoil","Near Mint",1,143.46,0,0,"2026-10-11"],["PCn","Hot Air Arena","Misty's Psyduck","071/063","Art Rare","Holofoil","Near Mint",1,303.01,0,0,"2026-10-11"],["PCn","Journey Together","Articuno","161/159","Illustration Rare","Holofoil","Near Mint",1,149.65,0,0,"2026-10-11"],["PCn","Journey Together","Blaziken ex","024/159","Double Rare","Holofoil","Near Mint",1,11.35,0,0,"2026-10-11"],["PCn","Journey Together","Hop's Zacian ex","186/159","Special Illustration Rare","Holofoil","Near Mint",1,264.85,0,0,"2026-10-11"],["PCn","Journey Together","Hop's Zacian ex","176/159","Ultra Rare","Holofoil","Near Mint",1,18.98,0,0,"2026-10-11"],["PCn","Journey Together","Hop's Zacian ex","111/159","Double Rare","Holofoil","Near Mint",1,7.03,0,0,"2026-10-11"],["PCn","Journey Together","Lokix","100/159","Uncommon","Normal","Near Mint",1,0.9,0,0,"2026-10-11"],["PCn","Journey Together","N's Reshiram","167/159","Illustration Rare","Holofoil","Near Mint",1,126.35,0,0,"2026-10-11"],["PCn","Journey Together","N's Zoroark ex","098/159","Double Rare","Holofoil","Near Mint",1,18.28,0,0,"2026-10-11"],["PCn","Journey Together","Tyranitar","095/159","Holo Rare","Holofoil","Near Mint",1,2.51,0,0,"2026-10-11"],["PCn","Journey Together","Volcanion ex","182/159","Special Illustration Rare","Holofoil","Near Mint",1,146.74,0,0,"2026-10-11"],["PCn","Lost Origin","Aerodactyl VSTAR","093/196","Ultra Rare","Holofoil","Near Mint",1,11.36,0,0,"2026-10-11"],["PCn","Lost Origin","Hisuian Zoroark","076/196","Holo Rare","Holofoil","Near Mint",1,1.8,0,0,"2026-10-11"],["PCn","Lost Origin","Hisuian Zoroark VSTAR","147/196","Ultra Rare","Holofoil","Near Mint",1,9.68,0,0,"2026-10-11"],["PCn","Lost Origin","Radiant Gardevoir","069/196","Radiant Rare","Holofoil","Near Mint",1,7.99,0,0,"2026-10-11"],["PCn","Lost Origin","Radiant Steelix","124/196","Radiant Rare","Holofoil","Near Mint",1,6.19,0,0,"2026-10-11"],["PCn","Lost Origin Trainer Gallery","Eternatus VMAX","TG22/TG30","Ultra Rare","Holofoil","Near Mint",1,127.03,0,1,"2026-10-11"],["PCn","Lost Origin Trainer Gallery","Gallade V","TG19/TG30","Ultra Rare","Holofoil","Near Mint",1,145.71,0,0,"2026-10-11"],["PCn","M6a: 30th Celebration","Pikachu","030/103","Pikachu Rare","Holofoil","Near Mint",1,15.47,0,0,"2026-10-11"],["PCn","M6a: 30th Celebration","Pikachu","026/103","Pikachu Rare","Holofoil","Near Mint",1,23.9,0,0,"2026-10-11"],["PCn","M6a: 30th Celebration","Poke Pad","102/103","Common","Holofoil","Near Mint",1,10.04,0,0,"2026-10-11"],["PCn","M6a: 30th Celebration","Sylveon ex","130/103","Special Art Rare","Holofoil","Near Mint",1,545.77,0,0,"2026-10-11"],["PCn","McDonald's Promos 2024","Charizard","001/015","Promo","Normal","Lightly Played",1,21.85,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Charizard X ex","223/193","Mega Attack Rare","Holofoil","Near Mint",1,275.5,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Diancie ex","227/193","Mega Attack Rare","Holofoil","Near Mint",1,36.66,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Dragonite ex","232/193","Mega Attack Rare","Holofoil","Near Mint",1,142.62,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Eelektross ex","235/193","Special Art Rare","Holofoil","Near Mint",1,95.61,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Eelektross ex","225/193","Mega Attack Rare","Holofoil","Near Mint",1,26.31,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Froslass ex","224/193","Mega Attack Rare","Holofoil","Near Mint",1,51.42,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Gardevoir ex","226/193","Mega Attack Rare","Holofoil","Near Mint",1,55.54,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Gengar ex","230/193","Mega Attack Rare","Holofoil","Near Mint",1,178.37,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Hawlucha ex","229/193","Mega Attack Rare","Holofoil","Near Mint",1,39.77,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Lucario ex","228/193","Mega Attack Rare","Holofoil","Near Mint",1,65.99,0,0,"2026-10-11"],["PCn","MEGA Dream ex","Mega Scrafty ex","231/193","Mega Attack Rare","Holofoil","Near Mint",1,30.43,0,0,"2026-10-11"],["PCn","Mega Evolution","Helioptile","052/132","Common","Normal","Near Mint",1,1.41,0,0,"2026-10-11"],["PCn","Mega Evolution","Mega Absol ex","180/132","Special Illustration Rare","Holofoil","Near Mint",1,492.14,0,0,"2026-10-11"],["PCn","Mega Evolution","Mega Absol ex","161/132","Ultra Rare","Holofoil","Near Mint",1,47.51,0,0,"2026-10-11"],["PCn","Mega Evolution","Mega Absol ex","086/132","Double Rare","Holofoil","Near Mint",1,6.73,0,0,"2026-10-11"],["PCn","Mega Evolution","Mega Camerupt ex","156/132","Ultra Rare","Holofoil","Near Mint",1,12.86,0,0,"2026-10-11"],["PCn","Mega Evolution","Mega Latias ex","163/132","Ultra Rare","Holofoil","Near Mint",1,44.09,0,0,"2026-10-11"],["PCn","Mega Evolution","Mega Manectric ex","158/132","Ultra Rare","Holofoil","Near Mint",1,22.3,0,0,"2026-10-11"],["PCn","Mega Evolution","Mega Venusaur ex","003/132","Double Rare","Holofoil","Near Mint",1,12.76,0,0,"2026-10-11"],["PCn","Mega Evolution Promos","Alakazam","003","Promo","Holofoil","Near Mint",1,197.66,0,0,"2026-10-11"],["PCn","Mega Evolution Promos","Chimchar","041","Promo","Holofoil","Near Mint",1,55.04,0,0,"2026-10-11"],["PCn","Mega Evolution Promos","Mega Charizard X ex","023","Promo","Holofoil","Near Mint",1,244.96,0,0,"2026-10-11"],["PCn","Mega Evolution Promos","Mega Gardevoir ex","032","Promo","Holofoil","Near Mint",1,60.66,0,0,"2026-10-11"],["PCn","Mega Evolution Promos","Mega Zygarde ex","071","Promo","Holofoil","Near Mint",1,4.62,0,0,"2026-10-11"],["PCn","Mega Evolution Promos","N's Zekrom","031","Promo","Holofoil","Near Mint",1,53.13,0,0,"2026-10-11"],["PCn","Mega Evolution Promos","Oricorio ex","024","Promo","Holofoil","Near Mint",1,87.08,0,0,"2026-10-11"],["PCn","Miscellaneous Cards & Products","Greninja ex (GameStop Metal Card)","106/167","Double Rare","Normal","Near Mint",1,686.18,0,0,"2026-10-11"],["PCn","Miscellaneous Cards & Products","Yveltal (Mega Evolution Stamped)","088/132","Rare","Holofoil","Near Mint",1,388.28,0,0,"2026-10-11"],["PCn","Neo Discovery","Caterpie","53","Common","1st Edition","Near Mint",1,79.65,0,1,"2026-10-11"],["PCn","Neo Discovery","Omanyte","60","Common","Unlimited","Near Mint",1,6.64,0,0,"2026-10-11"],["PCn","Neo Revelation","Shuckle","51","Common","Unlimited","Near Mint",1,26.44,0,0,"2026-10-12"],["PCn","Nihil Zero","Mega Zygarde ex","113/080","Special Art Rare","Holofoil","Near Mint",1,281.02,0,1,"2026-10-11"],["PCn","Obsidian Flames","Charizard ex","125/197","Double Rare","Holofoil","Near Mint",1,38.59,0,0,"2026-10-11"],["PCn","Obsidian Flames","Revavroom ex","224/197","Special Illustration Rare","Holofoil","Near Mint",1,51.76,0,0,"2026-10-11"],["PCn","Obsidian Flames","Tyranitar ex","066/197","Double Rare","Holofoil","Near Mint",1,13.62,0,0,"2026-10-11"],["PCn","Paldea Evolved","Chien-Pao ex","274/193","Hyper Rare","Holofoil","Near Mint",1,56.71,0,0,"2026-10-11"],["PCn","Paldea Evolved","Meowscarada ex","256/193","Special Illustration Rare","Holofoil","Near Mint",1,207.15,0,0,"2026-10-11"],["PCn","Paldea Evolved","Paldean Tauros","028/193","Uncommon","Normal","Near Mint",1,0.79,0,0,"2026-10-11"],["PCn","Paldean Fates","Gardevoir ex","029/091","Double Rare","Holofoil","Near Mint",1,7.43,0,0,"2026-10-11"],["PCn","Paradox Rift","Garchomp ex","038/182","Double Rare","Holofoil","Near Mint",1,8.74,0,0,"2026-10-11"],["PCn","Paradox Rift","Iron Valiant ex","249/182","Special Illustration Rare","Holofoil","Near Mint",1,205.29,0,0,"2026-10-11"],["PCn","Paradox Rift","Mewtwo ex","058/182","Double Rare","Holofoil","Near Mint",1,27.72,0,0,"2026-10-11"],["PCn","Paradox Rift","Octillery","034/182","Common","Reverse Holofoil","Near Mint",1,2.81,0,0,"2026-10-11"],["PCn","Perfect Order","Aurorus","092/088","Illustration Rare","Holofoil","Near Mint",1,19.38,0,0,"2026-10-11"],["PCn","Perfect Order","Volcanion","025/088","Uncommon","Normal","Near Mint",1,0.8,0,0,"2026-10-11"],["PCn","Phantasmal Flames","Mega Charizard X ex","013/094","Double Rare","Holofoil","Near Mint",1,52.63,0,0,"2026-10-11"],["PCn","Phantasmal Flames","Mega Gengar ex","056/094","Double Rare","Holofoil","Near Mint",1,23.3,0,0,"2026-10-11"],["PCn","Phantasmal Flames","Mega Sharpedo ex","113/094","Ultra Rare","Holofoil","Near Mint",1,22.2,0,0,"2026-10-11"],["PCn","Phantasmal Flames","Mega Sharpedo ex","127/094","Special Illustration Rare","Holofoil","Near Mint",1,162.2,0,0,"2026-10-11"],["PCn","Phantasmal Flames","Nymble","009/094","Common","Reverse Holofoil","Near Mint",1,2.81,0,0,"2026-10-11"],["PCn","Phantasmal Flames","Reshiram","017/094","Rare","Holofoil","Near Mint",1,1.91,0,0,"2026-10-11"],["PCn","Phantasmal Flames","Zacian","100/094","Illustration Rare","Holofoil","Near Mint",1,39.47,0,0,"2026-10-11"],["PCn","Pitch Black","Mankey","042/084","Common","Reverse Holofoil","Near Mint",1,2.41,0,0,"2026-10-11"],["PCn","Pitch Black","Mega Darkrai ex","048/084","Double Rare","Holofoil","Near Mint",1,6.73,0,0,"2026-10-11"],["PCn","Plasma Storm","Infernape (Team Plasma)","17","Holo Rare","Holofoil","Near Mint",1,14.74,0,0,"2026-10-11"],["PCn","Pokemon Go","Dragonite VSTAR","050/078","Ultra Rare","Holofoil","Lightly Played",1,25.44,0,0,"2026-10-11"],["PCn","Primal Clash","M Aggron EX","94","Ultra Rare","Holofoil","Lightly Played",1,170.62,0,0,"2026-10-11"],["PCn","Primal Clash","M Gardevoir EX","106","Ultra Rare","Holofoil","Near Mint",1,293.22,0,0,"2026-10-11"],["PCn","Prismatic Evolutions","Glaceon ex","026/131","Double Rare","Holofoil","Near Mint",1,24.71,0,0,"2026-10-11"],["PCn","Prismatic Evolutions","Lucario ex","051/131","Double Rare","Holofoil","Near Mint",1,7.13,0,0,"2026-10-11"],["PCn","Rising Rivals","Gallade E4","20","Rare","Normal","Lightly Played",1,19.8,0,0,"2026-10-11"],["PCn","Scarlet & Violet Base Set","Dondozo","207/198","Illustration Rare","Holofoil","Near Mint",1,149.76,0,0,"2026-10-11"],["PCn","Scarlet & Violet Base Set","Great Tusk ex","246/198","Special Illustration Rare","Holofoil","Near Mint",1,132.88,0,0,"2026-10-11"],["PCn","Scarlet & Violet Base Set","Gyarados ex","045/198","Double Rare","Holofoil","Near Mint",1,14.51,0,0,"2026-10-11"],["PCn","Scarlet & Violet Base Set","Iron Treads ex","248/198","Special Illustration Rare","Holofoil","Near Mint",1,53.11,0,0,"2026-10-11"],["PCn","Scarlet & Violet Base Set","Miraidon ex","244/198","Special Illustration Rare","Holofoil","Near Mint",1,226.72,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Charizard ex","056","Promo","Holofoil","Near Mint",1,138.7,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Gothitelle - 211","211","Promo","Holofoil","Near Mint",1,35.76,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Hop's Zacian ex","SVP193","Double Rare","Holofoil","Near Mint",1,4.52,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Infernape","116","Promo","Holofoil","Near Mint",1,56.44,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Iron Thorns","098","Promo","Holofoil","Near Mint",1,22.7,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Kyogre ex","178","Promo","Holofoil","Near Mint",1,11.35,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Pawmot (Prerelease)","006","Promo","Holofoil","Near Mint",1,20.79,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Thundurus - 209","209","Promo","Holofoil","Near Mint",1,12.25,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Xatu (Prerelease)","059","Rare","Holofoil","Near Mint",1,16.87,0,0,"2026-10-11"],["PCn","Scarlet & Violet Promo","Zacian ex","198","Promo","Holofoil","Lightly Played",1,5.29,0,0,"2026-10-11"],["PCn","Shining Fates","Kyogre","021/072","Amazing Rare","Holofoil","Near Mint",1,69.31,0,0,"2026-10-11"],["PCn","Shining Fates","Reshiram","017/072","Amazing Rare","Holofoil","Near Mint",1,62.22,0,0,"2026-10-11"],["PCn","Shining Fates","Yveltal","046/072","Amazing Rare","Holofoil","Near Mint",1,46.02,0,0,"2026-10-11"],["PCn","Shining Fates: Shiny Vault","Eternatus V","SV121/SV122","Shiny Holo Rare","Holofoil","Near Mint",1,69.31,0,0,"2026-10-11"],["PCn","Silver Tempest","Radiant Alakazam","059/195","Radiant Rare","Holofoil","Near Mint",1,11.7,0,0,"2026-10-11"],["PCn","Silver Tempest","Radiant Jirachi","120/195","Radiant Rare","Holofoil","Near Mint",1,11.36,0,0,"2026-10-11"],["PCn","Silver Tempest","Regidrago VSTAR","136/195","Ultra Rare","Holofoil","Near Mint",1,13.39,0,0,"2026-10-11"],["PCn","Silver Tempest","Reshiram V","024/195","Ultra Rare","Holofoil","Near Mint",1,12.83,0,0,"2026-10-11"],["PCn","Silver Tempest","Serperior VSTAR (Secret)","210/195","Secret Rare","Holofoil","Near Mint",1,62.11,0,0,"2026-10-11"],["PCn","Silver Tempest Trainer Gallery","Corviknight VMAX","TG19/TG30","Ultra Rare","Holofoil","Near Mint",1,100.82,0,0,"2026-10-11"],["PCn","Steam Siege","Infernape","20","Holo Rare","Reverse Holofoil","Lightly Played",1,8.61,0,0,"2026-10-11"],["PCn","Steam Siege","M Steelix EX","68","Ultra Rare","Holofoil","Near Mint",1,91.25,0,0,"2026-10-11"],["PCn","Stellar Crown","Greninja ex","041/142","Double Rare","Holofoil","Near Mint",1,12.76,0,0,"2026-10-11"],["PCn","Stellar Crown","Meltan","102/142","Common","Normal","Near Mint",1,2.81,0,0,"2026-10-11"],["PCn","Sun & Moon Promo","Charizard GX","SM211","Promo","Holofoil","Near Mint",1,105.96,0,0,"2026-10-11"],["PCn","Sun & Moon Promo","Charizard GX","SM195","Promo","Holofoil","Moderately Played",1,201.05,0,1,"2026-10-11"],["PCn","Sun & Moon Promo","Gyarados GX","SM212","Promo","Holofoil","Near Mint",1,32.04,0,1,"2026-10-11"],["PCn","Sun & Moon Promo","Raichu GX","SM213","Promo","Holofoil","Moderately Played",1,14.39,0,1,"2026-10-11"],["PCn","Sun & Moon Promo","Salazzle GX","SM63","Promo","Holofoil","Lightly Played",1,20.75,0,0,"2026-10-11"],["PCn","Super Electric Breaker","Hydreigon ex (JP)","133/106","Special Art Rare","Holofoil","Near Mint",1,269.95,0,0,"2026-10-11"],["PCn","Surging Sparks","Hydreigon ex","119/191","Double Rare","Holofoil","Near Mint",1,7.83,0,0,"2026-10-11"],["PCn","Surging Sparks","Latias ex","076/191","Double Rare","Holofoil","Near Mint",1,62.47,0,0,"2026-10-11"],["PCn","Surging Sparks","Milotic ex","217/191","Ultra Rare","Holofoil","Near Mint",1,22.6,0,0,"2026-10-11"],["PCn","Surging Sparks","Skarmory","209/191","Illustration Rare","Holofoil","Near Mint",1,82.26,0,0,"2026-10-11"],["PCn","SV: 151","Alakazam ex","065/165","Double Rare","Holofoil","Near Mint",1,16.67,0,0,"2026-10-11"],["PCn","SV: 151","Blastoise ex","009/165","Double Rare","Holofoil","Near Mint",1,25.61,0,0,"2026-10-11"],["PCn","SV: 151","Charizard ex","006/165","Double Rare","Holofoil","Near Mint",1,86.37,0,0,"2026-10-11"],["PCn","SV: 151","Venusaur ex","003/165","Double Rare","Holofoil","Near Mint",1,13.06,0,0,"2026-10-11"],["PCn","Sword & Shield Base Set","Zacian V","138/202","Ultra Rare","Holofoil","Near Mint",1,24.87,0,0,"2026-10-11"],["PCn","Sword & Shield Base Set","Zamazenta V (Full Art)","196/202","Ultra Rare","Holofoil","Near Mint",1,140.53,0,0,"2026-10-11"],["PCn","Sword & Shield Promo","Charizard VMAX","SWSH261","Promo","Holofoil","Near Mint",1,380.75,0,0,"2026-10-11"],["PCn","Sword & Shield Promo","Dragonite V","SWSH154","Promo","Holofoil","Lightly Played",1,54.21,0,0,"2026-10-11"],["PCn","Sword & Shield Promo","Galarian Articuno","SWSH282","Promo","Holofoil","Near Mint",1,46.6,0,0,"2026-10-11"],["PCn","Sword & Shield Promo","Greninja Star","SWSH144","Promo","Holofoil","Near Mint",1,187.11,0,0,"2026-10-11"],["PCn","Sword & Shield Promo","Infernape V","SWSH252","Promo","Holofoil","Near Mint",1,9.84,0,0,"2026-10-11"],["PCn","Sword & Shield Promo","Machamp (Prerelease)","SWSH243","Promo","Holofoil","Near Mint",1,28.22,0,0,"2026-10-11"],["PCn","Sword & Shield Promo","Zacian V (Shiny)","SWSH292","Promo","Holofoil","Near Mint",1,53.63,0,0,"2026-10-11"],["PCn","Temporal Forces","Gengar ex","104/162","Double Rare","Holofoil","Near Mint",1,65.79,0,0,"2026-10-11"],["PCn","Temporal Forces","Grotle","164/162","Illustration Rare","Holofoil","Near Mint",1,154.67,0,0,"2026-10-11"],["PCn","Temporal Forces","Pikachu","051/162","Common","Normal","Near Mint",1,3.31,0,0,"2026-10-11"],["PCn","Temporal Forces","Scizor ex","111/162","Double Rare","Holofoil","Near Mint",1,7.73,0,0,"2026-10-11"],["PCn","Temporal Forces","Scizor ex","195/162","Ultra Rare","Holofoil","Near Mint",1,38.17,0,0,"2026-10-11"],["PCn","Temporal Forces","Torterra ex","185/162","Ultra Rare","Holofoil","Near Mint",1,48.91,0,0,"2026-10-11"],["PCn","Twilight Masquerade","Infernape","173/167","Illustration Rare","Holofoil","Near Mint",1,143.42,0,0,"2026-10-11"],["PCn","Twilight Masquerade","Monferno","032/167","Common","Reverse Holofoil","Near Mint",1,2.31,0,0,"2026-10-11"],["PCn","Vivid Voltage","Celebi","009/185","Amazing Rare","Holofoil","Near Mint",1,176.09,0,0,"2026-10-11"],["PCn","Vivid Voltage","Jirachi","119/185","Amazing Rare","Holofoil","Near Mint",1,160.23,0,0,"2026-10-11"],["PCn","Vivid Voltage","Raikou","050/185","Amazing Rare","Holofoil","Near Mint",1,139.3,0,0,"2026-10-11"],["PCn","Vivid Voltage","Rayquaza","138/185","Amazing Rare","Holofoil","Near Mint",1,377.39,0,0,"2026-10-11"],["PCn","Vivid Voltage","Zacian","082/185","Amazing Rare","Holofoil","Near Mint",1,77.41,0,0,"2026-10-11"],["PCn","Vivid Voltage","Zamazenta","102/185","Amazing Rare","Holofoil","Near Mint",1,74.6,0,0,"2026-10-11"],["PCn","VSTAR Universe","Zamazenta V (JP)","232/172","Secret Rare","Holofoil","Near Mint",1,131.21,0,0,"2026-10-11"],["PCn","White Flare","Durant","070/086","Uncommon","Normal","Near Mint",1,2.21,0,0,"2026-10-11"],["PCn","White Flare","Mienfoo","133/086","Illustration Rare","Holofoil","Near Mint",1,136.59,0,0,"2026-10-11"],["PCn","White Flare","Reshiram ex","020/086","Double Rare","Holofoil","Near Mint",1,5.93,0,0,"2026-10-11"],["PCn","White Flare","Reshiram ex","158/086","Ultra Rare","Holofoil","Near Mint",1,30.43,0,0,"2026-10-11"],["PCn","White Flare","Sawk","130/086","Illustration Rare","Holofoil","Near Mint",1,114.5,0,0,"2026-10-11"],["PCn","XY Promos","M Sharpedo EX","XY200","Promo","Holofoil","Moderately Played",1,194.49,0,0,"2026-10-11"],["Tradebinder","30th Celebration","Scraggy","140/128","Illustration Rare","Holofoil","Near Mint",1,13.86,0,0,"2026-10-11"],["Tradebinder","Abyss Eye","Mega Chandelure ex","036/081","Double Rare","Holofoil","Near Mint",1,5.52,0,0,"2026-10-11"],["Tradebinder","Ancient Origins","Tyranitar EX","42","Ultra Rare","Holofoil","Lightly Played",1,0.19,60,0,"2026-10-11"],["Tradebinder","Ascended Heroes","Mega Diancie ex","267/217","Mega Attack Rare","Holofoil","Near Mint",1,55.14,0,0,"2026-10-11"],["Tradebinder","Ascended Heroes","Mega Eelektross ex","266/217","Mega Attack Rare","Holofoil","Near Mint",1,33.14,0,0,"2026-10-11"],["Tradebinder","Ascended Heroes","Mega Froslass ex","265/217","Mega Attack Rare","Holofoil","Near Mint",1,62.97,0,0,"2026-10-11"],["Tradebinder","Ascended Heroes","Mega Hawlucha ex","268/217","Mega Attack Rare","Holofoil","Near Mint",1,41.18,0,0,"2026-10-11"],["Tradebinder","Ascended Heroes","Mega Scrafty ex","270/217","Mega Attack Rare","Holofoil","Near Mint",1,36.36,0,0,"2026-10-11"],["Tradebinder","Astral Radiance","Origin Forme Palkia V","039/189","Ultra Rare","Holofoil","Lightly Played",1,8.51,0,0,"2026-10-11"],["Tradebinder","Brilliant Stars","Arceus VSTAR","123/172","Ultra Rare","Holofoil","Lightly Played",1,36.53,0,0,"2026-10-11"],["Tradebinder","Celebrations","Flying Pikachu VMAX","007/025","Ultra Rare","Holofoil","Moderately Played",1,43.46,0,0,"2026-10-11"],["Tradebinder","Chaos Rising","Mega Gallade ex","048/086","Double Rare","Holofoil","Near Mint",1,6.63,0,0,"2026-10-11"],["Tradebinder","Chilling Reign","Tornadus VMAX","125/198","Ultra Rare","Holofoil","Near Mint",1,15.86,0,0,"2026-10-11"],["Tradebinder","Darkness Ablaze","Grimmsnarl VMAX","115/189","Ultra Rare","Holofoil","Near Mint",1,31.62,0,0,"2026-10-11"],["Tradebinder","Destined Rivals","Regirock ex","101/182","Double Rare","Holofoil","Near Mint",1,5.52,0,0,"2026-10-11"],["Tradebinder","Destined Rivals","Team Rocket's Nidoking ex","216/182","Ultra Rare","Holofoil","Near Mint",1,27.52,0,0,"2026-10-11"],["Tradebinder","Destined Rivals","Team Rocket's Spidops","187/182","Illustration Rare","Holofoil","Near Mint",1,40.68,0,0,"2026-10-11"],["Tradebinder","Evolving Skies","Umbreon V","094/203","Ultra Rare","Holofoil","Moderately Played",1,74.35,0,0,"2026-10-11"],["Tradebinder","Fates Collide","Altaria EX (Full Art)","123","Ultra Rare","Holofoil","Lightly Played",1,199.12,0,0,"2026-10-11"],["Tradebinder","Gem Pack Vol. 4","Charjabug (Shiny Pattern) CN","2106/07","RR","Holofoil","Near Mint",1,16.69,0,0,"2026-10-11"],["Tradebinder","Journey Together","N's Zoroark ex","175/159","Ultra Rare","Holofoil","Near Mint",1,32.44,0,0,"2026-10-11"],["Tradebinder","Journey Together","Veluza ex","043/159","Double Rare","Holofoil","Near Mint",1,5.32,0,0,"2026-10-11"],["Tradebinder","M6a: 30th Celebration","Fuecoco ex","009/103","Double Rare","Holofoil","Near Mint",1,5.72,0,0,"2026-10-11"],["Tradebinder","McDonald's Promos 2024","Hydreigon","010/015","Promo","Holofoil","Near Mint",1,5.12,0,0,"2026-10-11"],["Tradebinder","Mega Evolution","Mega Mawile ex","094/132","Double Rare","Holofoil","Near Mint",1,6.03,0,0,"2026-10-11"],["Tradebinder","Mega Evolution Promos","Nidorina - 101 (30th Celebration)","101","Promo","Holofoil","Near Mint",1,16.87,0,0,"2026-10-11"],["Tradebinder","Mega Evolution Promos","Tyrunt","070","Promo","Holofoil","Near Mint",1,19.79,0,0,"2026-10-11"],["Tradebinder","Paldea Evolved","Quaquaval ex","273/193","Hyper Rare","Holofoil","Near Mint",1,51.2,0,0,"2026-10-11"],["Tradebinder","Paldean Fates","Bisharp","186/091","Shiny Rare","Holofoil","Near Mint",1,27.62,0,0,"2026-10-11"],["Tradebinder","Paldean Fates","Chi-Yu","241/091","Hyper Rare","Holofoil","Near Mint",1,109.17,0,0,"2026-10-11"],["Tradebinder","Paldean Fates","Veluza","125/091","Shiny Rare","Holofoil","Near Mint",1,26.41,0,0,"2026-10-11"],["Tradebinder","Paldean Fates","Wo-Chien ex","240/091","Hyper Rare","Holofoil","Near Mint",1,66.69,0,0,"2026-10-11"],["Tradebinder","Paradox Rift","Aegislash ex","230/182","Ultra Rare","Holofoil","Near Mint",1,17.27,0,0,"2026-10-11"],["Tradebinder","Paradox Rift","Roaring Moon ex","262/182","Hyper Rare","Holofoil","Near Mint",1,67.19,0,0,"2026-10-11"],["Tradebinder","Perfect Order","Doublade","098/088","Illustration Rare","Holofoil","Near Mint",1,14.06,0,0,"2026-10-11"],["Tradebinder","Phantasmal Flames","Mega Lopunny ex","084/094","Double Rare","Holofoil","Near Mint",1,6.63,0,0,"2026-10-11"],["Tradebinder","Phantasmal Flames","Toxtricity","103/094","Illustration Rare","Holofoil","Near Mint",1,25.31,0,0,"2026-10-11"],["Tradebinder","Pitch Black","Armarouge","086/084","Illustration Rare","Holofoil","Near Mint",1,18.88,0,1,"2026-10-11"],["Tradebinder","Pitch Black","Lurantis ex","004/084","Double Rare","Holofoil","Near Mint",1,4.62,0,0,"2026-10-11"],["Tradebinder","Pokemon Go","Melmetal VMAX","048/078","Ultra Rare","Holofoil","Near Mint",1,14.96,0,0,"2026-10-11"],["Tradebinder","Roaring Skies","Gallade EX","34","Ultra Rare","Holofoil","Near Mint",1,53.22,0,0,"2026-10-11"],["Tradebinder","Roaring Skies","Thundurus EX (98 Full Art)","98","Ultra Rare","Holofoil","Lightly Played",1,157.33,0,0,"2026-10-11"],["Tradebinder","Scarlet & Violet Promo","Victini","208","Promo","Holofoil","Near Mint",1,85.67,0,0,"2026-10-11"],["Tradebinder","Shining Fates: Shiny Vault","Grimmsnarl V","SV116/SV122","Shiny Holo Rare","Holofoil","Near Mint",1,21.72,0,0,"2026-10-11"],["Tradebinder","Silver Tempest","Serperior VSTAR","008/195","Ultra Rare","Holofoil","Near Mint",1,12.71,0,0,"2026-10-11"],["Tradebinder","Storm Emeralda","Raikou ex (JP)","024/076","Double Rare","Holofoil","Near Mint",1,4.02,0,0,"2026-10-11"],["Tradebinder","Trick or Trade BOOster Bundle 2024","Darkrai (Cosmos Holo)","136/197","Holo Rare","Holofoil","Near Mint",1,5.42,0,0,"2026-10-11"],["Tradebinder","Vivid Voltage","Aegislash VMAX","127/185","Ultra Rare","Holofoil","Lightly Played",1,13.49,0,0,"2026-10-11"],["Tradebinder","Vivid Voltage","Raikou","050/185","Amazing Rare","Holofoil","Lightly Played",1,139.3,0,0,"2026-10-11"],["Tradebinder","White Flare","Whimsicott ex","005/086","Double Rare","Holofoil","Near Mint",1,4.62,0,0,"2026-10-11"]];
+const cards = RAW.map((r,i)=>({id:i,binder:r[0],set:r[1],name:r[2],no:r[3],rarity:r[4],variant:r[5],cond:r[6],qty:r[7],market:r[8],override:r[9],watch:!!r[10],date:r[11]}));
+cards.forEach(c=>{c.price=c.market;c.value=c.price*c.qty;});
+const COND=[["Near Mint","NM"],["Lightly Played","LP"],["Moderately Played","MP"],["Heavily Played","HP"],["Damaged","DMG"]];
+const condAbbr=Object.fromEntries(COND);
+const money=new Intl.NumberFormat('sv-SE',{style:'currency',currency:'SEK',maximumFractionDigits:2,minimumFractionDigits:2});
+const money0=new Intl.NumberFormat('sv-SE',{style:'currency',currency:'SEK',maximumFractionDigits:0});
+const nf=new Intl.NumberFormat('sv-SE');
+const pct=v=>(v*100).toLocaleString('sv-SE',{maximumFractionDigits:1})+' %';
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const $=id=>document.getElementById(id);
+const totalQty=sum(cards,c=>c.qty), totalVal=sum(cards,c=>c.value);
+const sets=new Set(cards.map(c=>c.set));
+
+/* ---------- START ---------- */
+$('heroStats').innerHTML=[
+  [nf.format(totalQty),'kort totalt'],
+  [nf.format(cards.length),'unika rader'],
+  [nf.format(sets.size),'olika set'],
+  [money0.format(totalVal),'totalt värde',true]
+].map(([b,s,h])=>`<div class="stat"><b class="num ${h?'hl':''}">${b}</b><span>${s}</span></div>`).join('');
+const pal=cards.find(c=>c.binder==='Palafin'&&c.no==='225/091');
+$('palafinQty').textContent=pal?`${pal.qty} exemplar i samlingen`:'';
+$('topList').innerHTML=[...cards].sort((a,b)=>b.value-a.value).slice(0,6).map((c,i)=>`
+  <div class="row rank"><span class="n">${String(i+1).padStart(2,'0')}</span><div style="min-width:0"><div class="t">${esc(c.name)}</div><div class="s">${esc(c.set)} · ${esc(c.rarity)}</div></div><span class="num">${money0.format(c.value)}</span></div>`).join('');
+const byBinder={};cards.forEach(c=>{(byBinder[c.binder]??={qty:0,val:0,rows:[]});byBinder[c.binder].qty+=c.qty;byBinder[c.binder].val+=c.value;byBinder[c.binder].rows.push(c);});
+const binderNames=Object.keys(byBinder).sort((a,b)=>byBinder[b].val-byBinder[a].val);
+const maxBV=Math.max(...binderNames.map(b=>byBinder[b].val));
+$('binders').innerHTML=binderNames.map(b=>`<a class="binder" href="#samling" data-binder="${esc(b)}"><div style="display:flex;justify-content:space-between;gap:10px"><span class="t" style="font-weight:600">${esc(b)}</span><span class="num">${money0.format(byBinder[b].val)}</span></div><div class="s" style="font-size:12.5px;color:var(--muted)">${nf.format(byBinder[b].qty)} kort</div><div class="bar"><span style="width:${(byBinder[b].val/maxBV*100).toFixed(1)}%"></span></div></a>`).join('');
+document.querySelectorAll('[data-binder]').forEach(a=>a.addEventListener('click',()=>{resetFilters();$('fp').value=a.dataset.binder;}));
+$('recent').innerHTML=[...cards].sort((a,b)=>b.date.localeCompare(a.date)||b.value-a.value).slice(0,6).map(c=>`
+  <div class="row"><div style="min-width:0"><div class="t">${esc(c.name)}</div><div class="s">${esc(c.set)} · ${c.date}</div></div><span class="num">${money.format(c.price)}</span></div>`).join('');
+
+// holo tilt
+const holo=$('holo');const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!reduce){holo.addEventListener('pointermove',e=>{const r=holo.getBoundingClientRect();const x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;holo.style.transform=`rotateY(${(x-.5)*18}deg) rotateX(${(.5-y)*14}deg)`;holo.style.setProperty('--gx',(x*100)+'%');holo.style.setProperty('--gy',(y*100)+'%');});
+holo.addEventListener('pointerleave',()=>{holo.style.transform='';});}
+
+/* ---------- SAMLING ---------- */
+const uniq=(f,sortFn)=>[...new Set(cards.map(f))].sort(sortFn);
+const rarCount={};cards.forEach(c=>rarCount[c.rarity]=(rarCount[c.rarity]||0)+c.qty);
+$('fp').innerHTML='<option value="">Alla pärmar</option>'+binderNames.map(b=>`<option>${esc(b)}</option>`).join('');
+$('fr').innerHTML='<option value="">All rarity</option>'+uniq(c=>c.rarity,(a,b)=>rarCount[b]-rarCount[a]).map(r=>`<option>${esc(r)}</option>`).join('');
+$('fc').innerHTML='<option value="">Alla skick</option>'+COND.filter(([n])=>cards.some(c=>c.cond===n)).map(([n,a])=>`<option value="${n}">${n} (${a})</option>`).join('');
+let limit=60;
+const sv=(x,y)=>x.localeCompare(y,'sv',{sensitivity:'base',numeric:true});
+const byName=(a,b)=>sv(a.name,b.name)||sv(a.set,b.set)||sv(a.no,b.no);
+const condRank=c=>COND.findIndex(x=>x[0]===c);
+const cmp={name:byName,set:(a,b)=>sv(a.set,b.set)||sv(a.no,b.no),no:(a,b)=>sv(a.no,b.no),rarity:(a,b)=>sv(a.rarity,b.rarity),variant:(a,b)=>sv(a.variant,b.variant),cond:(a,b)=>condRank(a.cond)-condRank(b.cond),qty:(a,b)=>a.qty-b.qty,price:(a,b)=>a.price-b.price,value:(a,b)=>a.value-b.value};
+const numericKeys=['qty','price','value'];
+const sortState={key:'name',dir:'asc'};
+document.querySelectorAll('#sortRow th').forEach(th=>{const label=th.textContent;th.innerHTML=`<button type="button" class="sortbtn">${label}<span class="arr" aria-hidden="true">↕</span></button>`;
+  th.querySelector('button').addEventListener('click',()=>{const k=th.dataset.k;
+    if(sortState.key===k)sortState.dir=sortState.dir==='asc'?'desc':'asc';
+    else{sortState.key=k;sortState.dir=numericKeys.includes(k)?'desc':'asc';}
+    renderTable();});});
+function resetFilters(){['fq','fp','fr','fc'].forEach(id=>$(id).value='');limit=60;}
+function renderTable(){
+  const q=$('fq').value.trim().toLowerCase(),p=$('fp').value,r=$('fr').value,cn=$('fc').value;
+  let list=cards.filter(c=>(!p||c.binder===p)&&(!r||c.rarity===r)&&(!cn||c.cond===cn)&&(!q||`${c.name} ${c.set} ${c.no}`.toLowerCase().includes(q)));
+  const k=sortState.key,d=sortState.dir==='asc'?1:-1;
+  list.sort((a,b)=>d*cmp[k](a,b)||byName(a,b));
+  document.querySelectorAll('#sortRow th').forEach(th=>{const on=th.dataset.k===k;th.setAttribute('aria-sort',on?(sortState.dir==='asc'?'ascending':'descending'):'none');th.querySelector('.arr').textContent=on?(sortState.dir==='asc'?'▲':'▼'):'↕';});
+  $('rcount').innerHTML=`<b>${nf.format(list.length)}</b> rader · <b>${nf.format(sum(list,c=>c.qty))}</b> kort`;
+  $('rvalue').innerHTML=`Värde: <b class="num">${money.format(sum(list,c=>c.value))}</b>`;
+  $('tbody').innerHTML=list.length?list.slice(0,limit).map(c=>`<tr>
+    <td><div class="t">${esc(c.name)}${c.watch?'<span class="star" title="Bevakas">★</span>':''}</div><div class="s">${esc(c.binder)}</div></td>
+    <td class="s" style="color:var(--fg)">${esc(c.set)}</td>
+    <td class="num">${esc(c.no)}</td>
+    <td><span class="pill">${esc(c.rarity)}</span></td>
+    <td class="s">${esc(c.variant)}</td>
+    <td><span class="cond c-${condAbbr[c.cond]}">${condAbbr[c.cond]}</span></td>
+    <td class="r num">${c.qty}</td>
+    <td class="r num">${money.format(c.price)}</td>
+    <td class="r num"><b>${money.format(c.value)}</b></td></tr>`).join(''):`<tr><td colspan="9" class="empty">Inga kort matchar filtren. Rensa sökningen eller välj ”Alla”.</td></tr>`;
+  $('moreBtn').hidden=list.length<=limit;
+  $('moreBtn').textContent=`Visa fler (${nf.format(list.length-limit)} kvar)`;
+}
+['fq','fp','fr','fc'].forEach(id=>$(id).addEventListener('input',()=>{limit=60;renderTable();}));
+$('moreBtn').addEventListener('click',()=>{limit+=120;renderTable();});
+
+/* ---------- RARITY ---------- */
+const rar={};cards.forEach(c=>{const o=rar[c.rarity]??={name:c.rarity,count:0,rows:0,value:0,top:null,byCond:{}};o.count+=c.qty;o.byCond[c.cond]=(o.byCond[c.cond]||0)+c.qty;o.rows++;o.value+=c.value;if(!o.top||c.price>o.top.price)o.top=c;});
+const rarList=Object.values(rar);rarList.forEach(o=>o.avg=o.value/o.count);
+const topRar=[...rarList].sort((a,b)=>b.value-a.value)[0];
+const commonRar=[...rarList].sort((a,b)=>b.count-a.count)[0];
+const premium=['Illustration Rare','Special Illustration Rare','Special Art Rare','Hyper Rare','Secret Rare','Art Rare','Mega Attack Rare'];
+const premQty=sum(cards.filter(c=>premium.includes(c.rarity)),c=>c.qty);
+$('rarKpis').innerHTML=[
+  [rarList.length,'raritetsnivåer'],
+  [commonRar.name,`vanligast · ${nf.format(commonRar.count)} kort`],
+  [topRar.name,`störst värde · ${money0.format(topRar.value)}`],
+  [nf.format(premQty),'illustration-, art-, hyper- och secret rares']
+].map(([b,s])=>`<div class="kpi"><span>${s}</span><b class="${typeof b==='number'||/^\d/.test(b)?'num':''}">${esc(b)}</b></div>`).join('');
+let metric='count',rarCond='total';
+const mLabel={count:'Antal kort per rarity · andel av alla kort',value:'Totalt värde per rarity · andel av totalvärdet',avg:'Snittpris per kort och rarity'};
+function renderRar(){
+  $('condSeg').hidden=metric!=='cond';$('condLegendR').hidden=metric!=='cond';
+  if(metric==='cond')return renderRarCond();
+  const sorted=[...rarList].sort((a,b)=>b[metric]-a[metric]);const max=sorted[0][metric];const tot=metric==='avg'?0:sum(rarList,o=>o[metric]);
+  const share=o=>tot?o[metric]/tot:o[metric]/max;
+  $('rarChartTitle').textContent=mLabel[metric];
+  $('rarBars').innerHTML=sorted.map(o=>`<button class="hb" type="button" data-r="${esc(o.name)}" title="Visa ${esc(o.name)} i samlingen"><span class="lab">${esc(o.name)}</span><span class="pc">${tot?pct(share(o)):""}</span><span class="track"><span class="fill" style="width:${(share(o)*100).toFixed(2)}%"></span></span><span class="v">${metric==='count'?nf.format(o.count):money0.format(o[metric])}</span></button>`).join('');
+  $('rarBars').querySelectorAll('.hb').forEach(b=>b.addEventListener('click',()=>{resetFilters();$('fr').value=b.dataset.r;location.hash='samling';}));
+}
+const rarConds=COND.filter(([n])=>cards.some(c=>c.cond===n));
+function renderRarCond(){
+  const key=rarCond==='total'?o=>o.count:o=>o.byCond[rarCond]||0;
+  const sorted=[...rarList].sort((a,b)=>key(b)-key(a)||b.count-a.count||sv(a.name,b.name));
+  $('rarChartTitle').textContent=rarCond==='total'?'Antal kort per rarity, uppdelat på skick':`Antal kort per rarity, sorterat på ${condAbbr[rarCond]}`;
+  $('rarBars').innerHTML=sorted.map(o=>`<div class="hb hbs"><button type="button" class="lab lnk" data-r="${esc(o.name)}" title="Visa ${esc(o.name)} i samlingen">${esc(o.name)}</button><span class="pc">${pct(o.count/totalQty)}</span><span class="track stk">${rarConds.map(([n,a])=>{const q=o.byCond[n]||0;return q?`<button type="button" class="sg c-${a}${rarCond!=='total'&&rarCond!==n?' dim':''}" data-r="${esc(o.name)}" data-c="${n}" style="width:${(q/o.count*100).toFixed(3)}%" title="${esc(o.name)} · ${a}: ${q} kort (${pct(q/o.count)})" aria-label="${esc(o.name)} ${n}: ${q} kort"></button>`:'';}).join('')}</span><span class="v">${rarCond!=='total'?`<span class="cv c-${condAbbr[rarCond]}">${nf.format(o.byCond[rarCond]||0)}</span> / `:''}${nf.format(o.count)}</span></div>`).join('');
+  $('rarBars').querySelectorAll('[data-r]').forEach(b=>b.addEventListener('click',()=>{resetFilters();$('fr').value=b.dataset.r;if(b.dataset.c)$('fc').value=b.dataset.c;location.hash='samling';}));
+}
+document.querySelectorAll('#rarSeg button').forEach(b=>b.addEventListener('click',()=>{metric=b.dataset.m;document.querySelectorAll('#rarSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderRar();}));
+$('condSeg').innerHTML='<span class="seglab">Sortera</span><button type="button" data-c="total" aria-pressed="true">Totalt</button>'+rarConds.map(([n,a])=>`<button type="button" data-c="${n}" aria-pressed="false" title="Sortera på ${n}">${a}</button>`).join('');
+$('condLegendR').innerHTML=rarConds.map(([n,a])=>`<span class="cond c-${a}"><span style="color:var(--fg);font-weight:500">${a} · ${n}</span></span>`).join('');
+$('condSeg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{rarCond=b.dataset.c;$('condSeg').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderRar();}));
+renderRar();
+$('rarTop').innerHTML=[...rarList].sort((a,b)=>b.top.price-a.top.price).map(o=>`<div class="row"><div style="min-width:0"><div class="t">${esc(o.top.name)}</div><div class="s">${esc(o.name)} · ${esc(o.top.set)}</div></div><span class="num">${money0.format(o.top.price)}</span></div>`).join('');
+
+/* ---------- CONDITION ---------- */
+const condStats=COND.map(([n,a])=>{const rows=cards.filter(c=>c.cond===n);return{n,a,qty:sum(rows,c=>c.qty),rows:rows.length,val:sum(rows,c=>c.value)};});
+$('condStack').innerHTML=condStats.filter(s=>s.qty).map(s=>`<span class="c-${s.a}" style="flex:${s.qty} 0 0;background:currentColor" title="${s.n}: ${s.qty}"></span>`).join('');
+$('condLegend').innerHTML=condStats.filter(s=>s.qty).map(s=>`<span class="cond c-${s.a}"><span style="color:var(--fg);font-weight:500">${s.a} ${pct(s.qty/totalQty)}</span></span>`).join('');
+$('condTiles').innerHTML=condStats.map(s=>`<div class="ct c-${s.a}"><span class="nm">${s.a}</span><b class="num">${nf.format(s.qty)}</b><small>${s.n}</small><small class="num">${money0.format(s.val)} · ${pct(s.qty/totalQty)}</small></div>`).join('');
+const non=cards.filter(c=>c.cond!=='Near Mint').sort((a,b)=>COND.findIndex(x=>x[0]===b.cond)-COND.findIndex(x=>x[0]===a.cond)||b.value-a.value);
+$('nonNmSub').textContent=`${non.length} rader, ${nf.format(sum(non,c=>c.qty))} exemplar, värde ${money.format(sum(non,c=>c.value))}`;
+$('nonNm').innerHTML=non.map(c=>`<div class="row"><div style="min-width:0"><div class="t">${esc(c.name)}</div><div class="s">${esc(c.set)} · ${esc(c.binder)}</div></div><span style="display:flex;gap:12px;align-items:center"><span class="cond c-${condAbbr[c.cond]}">${condAbbr[c.cond]}</span><span class="num" style="min-width:64px;text-align:right">${money.format(c.price)}</span></span></div>`).join('');
+$('condBinders').innerHTML=binderNames.map(b=>{const rows=byBinder[b].rows,q=sum(rows,c=>c.qty),nm=sum(rows.filter(c=>c.cond==='Near Mint'),c=>c.qty);return`<div class="row" style="grid-template-columns:minmax(0,1fr)"><div><div style="display:flex;justify-content:space-between"><span class="t">${esc(b)}</span><span class="num">${pct(nm/q)}</span></div><div class="s">${nf.format(nm)} av ${nf.format(q)} kort</div><div class="bar"><span style="width:${(nm/q*100).toFixed(1)}%;background:var(--nm)"></span></div></div></div>`;}).join('');
+
+
+/* ---------- SLUMPA ---------- */
+const TIERS={'Common':['#5c7a8a','#2c4656'],'Uncommon':['#4f8f7a','#21463d'],'Rare':['#3f7fc4','#1a3a66'],'Holo Rare':['#46b4e0','#2a4f9a'],'Promo':['#d0a33a','#6b4a17'],'Double Rare':['#3fc8f0','#6b3fd0'],'RR':['#3fc8f0','#6b3fd0'],'Ultra Rare':['#9b6bff','#2f2a8a'],'Illustration Rare':['#ff7ab0','#3a6fe0'],'Art Rare':['#ff7ab0','#3a6fe0'],'Special Illustration Rare':['#ffcf5a','#e0457b'],'Special Art Rare':['#ffcf5a','#e0457b'],'Hyper Rare':['#ffd66b','#c08a12'],'Secret Rare':['#ffd66b','#a36a10'],'Mega Attack Rare':['#ff6a4d','#7a1f6b'],'Amazing Rare':['#7cf0d0','#b04de0'],'Radiant Rare':['#ffe27a','#3fb0f0'],'Shiny Holo Rare':['#c9d6e3','#5a6d8a'],'Shiny Rare':['#c9d6e3','#5a6d8a'],'Pikachu Rare':['#ffd84a','#e07a1f'],'Classic Collection':['#e8c27a','#6b4e2a']};
+$('rp').innerHTML='<option value="">Alla pärmar</option>'+binderNames.map(b=>`<option>${esc(b)}</option>`).join('');
+$('rr').innerHTML='<option value="">All rarity</option>'+[...rarList].sort((a,b)=>b.avg-a.avg).map(o=>`<option>${esc(o.name)}</option>`).join('');
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const keyOf=c=>`${c.binder}|${c.set}|${c.no}|${c.name}`;
+const findKey=k=>cards.find(c=>keyOf(c)===k);
+const HOW={quick:'Snabb',wheel:'Lyckohjul',scratch:'Skraplott',pack:'Boosterpack'};
+let current=null,chosen=findKey(LS.get('pkChosen'));
+let history=(LS.get('pkHist2')||[]).map(h=>({...h,c:findKey(h.k)})).filter(h=>h.c);
+const saveHist=()=>LS.set('pkHist2',history.map(({c,...h})=>h));
+function addHist(c){const d=new Date();history=[{k:keyOf(c),c,how:HOW[mode]||'',time:d.toLocaleDateString('sv-SE',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'})},...history].slice(0,100);saveHist();renderHist();}
+function poolList(){const p=$('rp').value,r=$('rr').value,nm=$('rc').value==='nm',min=+$('rmin').value||0;
+  return cards.filter(c=>(!p||c.binder===p)&&(!r||c.rarity===r)&&(!nm||c.cond==='Near Mint')&&c.price>=min);}
+function updPool(){const n=poolList().length;$('pool').textContent=n?`${nf.format(n)} kort i urvalet`:'Inga kort matchar urvalet. Sänk lägsta pris eller välj fler pärmar.';$('rollBtn').disabled=!n;}
+function paint(c){
+  const [a,b]=TIERS[c.rarity]||['#45cdf3','#ff5a92'];
+  $('face').style.setProperty('--t1',a);$('face').style.setProperty('--t2',b);
+  $('fTier').textContent=c.rarity;$('fName').textContent=c.name;$('fSet').textContent=`${c.set} · ${c.variant}`;
+  $('fMeta').textContent=`${c.no} · ${condAbbr[c.cond]}`;$('fPrice').textContent=money0.format(c.price);
+  $('sbName').textContent=c.name;$('sbSet').textContent=`${c.set} · ${c.binder}`;$('sbNo').textContent=c.no;}
+function show(c){current=c;paint(c);$('pickBtn').setAttribute('aria-pressed',chosen&&keyOf(chosen)===keyOf(c));$('pickBtn').textContent=chosen&&keyOf(chosen)===keyOf(c)?'Vald till one touch ✓':'Välj till one touch';}
+function renderHist(){$('histCount').textContent=history.length?nf.format(history.length):'';$('histClear').hidden=!history.length;
+  $('hist').innerHTML=history.length?history.map((h,i)=>`<div class="row" data-i="${i}" tabindex="0"><div style="min-width:0"><div class="t">${esc(h.c.name)}</div><div class="s">${esc(h.c.set)} · ${esc(h.c.rarity)} · ${esc(h.how)} · ${h.time}</div></div><span class="num">${money0.format(h.c.price)}</span></div>`).join(''):'<p class="pool">Inga dragningar än.</p>';
+  $('hist').querySelectorAll('.row').forEach(r=>{const go=()=>show(history[+r.dataset.i].c);r.addEventListener('click',go);r.addEventListener('keydown',e=>{if(e.key==='Enter')go();});});}
+function renderChosen(){$('chosenBox').hidden=!chosen;if(chosen){$('chosenName').textContent=chosen.name;$('chosenSet').textContent=`${chosen.set} · ${chosen.no} · ${chosen.binder}`;}}
+let spinning=false;
+let mode=LS.get('pkMode')||'quick';
+const MODES=['quick','wheel','scratch','pack'];if(!MODES.includes(mode))mode='quick';
+function setMode(m){mode=m;LS.set('pkMode',m);document.querySelectorAll('#modeSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));}
+document.querySelectorAll('#modeSeg button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));setMode(mode);
+const rnd=n=>Math.floor(Math.random()*n);
+function sample(list,n,must){const others=list.filter(c=>c!==must);for(let i=others.length-1;i>0;i--){const j=rnd(i+1);[others[i],others[j]]=[others[j],others[i]];}return others.slice(0,n);}
+function commit(pick,record=true){spinning=false;$('face').classList.remove('spin');show(pick);if(record)addHist(pick);}
+function roll(){const list=poolList();if(!list.length||spinning)return;
+  const cand=list.length>1&&current?list.filter(c=>keyOf(c)!==keyOf(current)):list;
+  const pick=cand[rnd(cand.length)];
+  if(reduce||list.length<2){commit(pick);return;}
+  spinning=true;
+  if(mode==='wheel')return runWheel(list,pick);
+  if(mode==='scratch')return runScratch(list,pick);
+  if(mode==='pack')return runPack(pick);
+  if(list.length<3){commit(pick);return;}
+  $('face').classList.add('spin');let n=0;const steps=14;
+  (function tick(){paint(list[rnd(list.length)]);n++;if(n<steps)setTimeout(tick,40+n*12);else commit(pick);})();}
+
+/* overlay */
+let ovPick=null,raf=0,ovSession=0;
+const later=(fn,ms)=>{const s=ovSession;return setTimeout(()=>{if(s===ovSession&&!$('ov').hidden)fn();},ms);};
+function openOv(){ovSession++;ovPick=null;$('ov').hidden=false;$('ovAct').hidden=true;$('ovAgain').hidden=true;$('stage').removeAttribute('style');$('ovRes').innerHTML='';$('ovClose').hidden=true;$('ovHint').textContent='';document.body.style.overflow='hidden';}
+function closeOv(){if(!$('ovClose').hidden||!spinning){cancelAnimationFrame(raf);$('ov').hidden=true;$('stage').innerHTML='';document.body.style.overflow='';if(ovPick){const p=ovPick;ovPick=null;commit(p,false);}}}
+function finishOv(pick,extra){ovPick=pick;addHist(pick);$('ovRes').innerHTML=`<div class="ovtier">${esc(pick.rarity)}${extra?' · '+esc(extra):''}</div><div class="ovname">${esc(pick.name)}</div><div class="ovsub">${esc(pick.set)} · ${esc(pick.no)} · ${condAbbr[pick.cond]} · <b class="num">${money0.format(pick.price)}</b></div>`;$('ovClose').hidden=false;$('ovAgain').hidden=false;$('ovClose').focus();}
+$('ovClose').addEventListener('click',closeOv);
+function cancelOv(){ovSession++;cancelAnimationFrame(raf);ovPick=null;spinning=false;$('ov').hidden=true;$('stage').innerHTML='';document.body.style.overflow='';$('rollBtn').focus();}
+$('ovX').addEventListener('click',cancelOv);
+$('ovAgain').addEventListener('click',()=>{ovSession++;cancelAnimationFrame(raf);ovPick=null;spinning=false;$('stage').innerHTML='';roll();});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('ov').hidden)cancelOv();});
+function makeCanvas(){const size=Math.round(Math.min(innerWidth-40,innerHeight*0.62,560));const dpr=Math.min(devicePixelRatio||1,2);
+  const cv=document.createElement('canvas');cv.width=size*dpr;cv.height=size*dpr;cv.style.width=size+'px';cv.style.height=size+'px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);return{cv,ctx,size};}
+const short=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
+const TAU=Math.PI*2,mod=(a,m)=>((a%m)+m)%m;
+const easeOut=p=>1-Math.pow(1-p,4);
+function tierCol(c,i){const t=TIERS[c.rarity]||['#45cdf3','#ff5a92'];return t[i%2];}
+
+/* Lyckohjul: 3 snurr med 3 pilar ger 9 kort, sedan en finalsnurr bland de 9 */
+function drawWheel(ctx,size,R,segs,r,ptrs,hl){const cx=size/2,cy=size/2,n=segs.length,s=TAU/n;ctx.clearRect(0,0,size,size);
+  for(let i=0;i<n;i++){const a0=r+i*s;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a0+s);ctx.closePath();
+    const g=ctx.createRadialGradient(cx,cy,R*.15,cx,cy,R);g.addColorStop(0,'#0a1b2a');g.addColorStop(1,tierCol(segs[i],i));ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=2;ctx.stroke();
+    if(hl&&hl.includes(i)){ctx.save();ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a0+s);ctx.closePath();ctx.fillStyle='rgba(255,255,255,.22)';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle='#ffd66b';ctx.stroke();ctx.restore();}
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a0+s/2);ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    ctx.font=`600 ${Math.max(11,Math.round(size/34))}px Figtree, system-ui, sans-serif`;ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=4;
+    ctx.fillText(short(segs[i].name,n>8?16:22),R-14,0);ctx.restore();}
+  ctx.beginPath();ctx.arc(cx,cy,R,0,TAU);ctx.lineWidth=6;ctx.strokeStyle='#e7f4f9';ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,R*.13,0,TAU);ctx.fillStyle='#e7f4f9';ctx.fill();ctx.beginPath();ctx.arc(cx,cy,R*.07,0,TAU);ctx.fillStyle='#ff5a92';ctx.fill();
+  ptrs.forEach(a=>{ctx.save();ctx.translate(cx,cy);ctx.rotate(a);ctx.beginPath();ctx.moveTo(R-14,0);ctx.lineTo(R+16,-13);ctx.lineTo(R+16,13);ctx.closePath();ctx.fillStyle='#ff5a92';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=6;ctx.fill();ctx.restore();});}
+function spinTo(state,segs,ptrs,targetIdx,T,done){const n=segs.length,s=TAU/n,p0=ptrs[0];
+  const target=p0-(targetIdx+.5)*s+(Math.random()-.5)*s*.5;const total=mod(target-state.rot,TAU)+TAU*(T>4000?6:4);const start=state.rot,t0=performance.now();
+  (function frame(now){const p=Math.min(1,(now-t0)/T);state.rot=start+total*easeOut(p);drawWheel(state.ctx,state.size,state.R,segs,state.rot,ptrs);
+    if(p<1)raf=requestAnimationFrame(frame);else done();})(t0);}
+function runWheel(list,pick){openOv();
+  const {cv,ctx,size}=makeCanvas();const wrap=document.createElement('div');wrap.className='wheelwrap';wrap.appendChild(cv);
+  const chips=document.createElement('div');chips.className='chips';$('stage').style.flexDirection='column';$('stage').style.alignItems='center';$('stage').append(wrap,chips);
+  const state={ctx,size,R:size/2-20,rot:Math.random()*TAU};
+  const P3=[-Math.PI/2,-Math.PI/2+TAU/3,-Math.PI/2+2*TAU/3],P1=[-Math.PI/2];
+  const nine=list.length>=9?[pick,...sample(list,8,pick)]:null;
+  const finalSpin=(cands)=>{const segs=[...cands];for(let i=segs.length-1;i>0;i--){const j=rnd(i+1);[segs[i],segs[j]]=[segs[j],segs[i]];}
+    $('ovHint').textContent=nine?'Finalsnurr bland de 9':'Lyckohjulet';drawWheel(ctx,size,state.R,segs,state.rot,P1);
+    actBtn('Snurra finalen',()=>{$('ovHint').textContent='Snurrar…';spinTo(state,segs,P1,segs.indexOf(pick),5200,()=>{drawWheel(ctx,size,state.R,segs,state.rot,P1,[segs.indexOf(pick)]);$('ovHint').textContent='';finishOv(pick);});});};
+  if(!nine){chips.hidden=true;finalSpin(list.length>12?[pick,...sample(list,11,pick)]:list);return;}
+  for(let i=nine.length-1;i>0;i--){const j=rnd(i+1);[nine[i],nine[j]]=[nine[j],nine[i]];}
+  const got=[];const renderChips=()=>{chips.innerHTML=`<div class="chiphead">Utvalda ${got.length}/9</div>`+got.map(c=>`<span class="chip" style="--c:${tierCol(c,0)}">${esc(short(c.name,22))}</span>`).join('');};renderChips();
+  let round=0;
+  const buildRound=()=>{const targets=nine.slice(round*3,round*3+3);const others=list.filter(c=>!nine.includes(c));
+    const fill=[];for(let i=0;i<9;i++)fill.push(others.length?others[rnd(others.length)]:nine[rnd(9)]);
+    const segs=new Array(12);const base=rnd(4);targets.forEach((c,k)=>segs[base+k*4]=c);let f=0;for(let i=0;i<12;i++)if(!segs[i])segs[i]=fill[f++];
+    return{segs,base,targets};};
+  const doRound=()=>{const R=buildRound();$('ovHint').textContent=`Snurr ${round+1} av 3 · tre pilar väljer tre kort`;drawWheel(ctx,size,state.R,R.segs,state.rot,P3);
+    actBtn(`Snurra (${round+1}/3)`,()=>{$('ovHint').textContent='Snurrar…';spinTo(state,R.segs,P3,R.base,3600,()=>{
+      drawWheel(ctx,size,state.R,R.segs,state.rot,P3,[R.base,R.base+4,R.base+8]);got.push(...R.targets);renderChips();round++;
+      $('ovHint').textContent=round<3?'Tre kort till listan':'Nio kort klara';
+      later(()=>{if(round<3)doRound();else finalSpin(nine);},900);});});};
+  doRound();}
+function actBtn(label,fn){const b=$('ovAct');b.hidden=false;b.textContent=label;b.onclick=()=>{b.hidden=true;fn();};b.focus();}
+
+/* Skraplott: tre lika vinner, med nästan-vinster som lockbete */
+function runScratch(list,pick){openOv();$('ovHint').textContent='Skrapa fram tre lika';
+  const others=sample(list,4,pick);if(others.length<4){$('ov').hidden=true;document.body.style.overflow='';spinning=false;return runQuickFallback(list,pick);}
+  const fields=[pick,pick,pick,others[0],others[0],others[1],others[1],others[2],others[3]];
+  for(let i=fields.length-1;i>0;i--){const j=rnd(i+1);[fields[i],fields[j]]=[fields[j],fields[i]];}
+  $('stage').innerHTML=`<div class="ticket"><div class="thead"><b>Skraplott</b><span>Hitta 3 lika · vinn kortet</span></div>
+    <div class="tgrid" id="tgrid">${fields.map((c,i)=>`<div class="tf" data-i="${i}" style="--c:${tierCol(c,0)}"><span class="tdot"></span><span class="tn">${esc(c.name)}</span><span class="tp num">${money0.format(c.price)}</span></div>`).join('')}
+    <canvas id="scr" aria-label="Skrapyta"></canvas></div><div class="tfoot">Oskars Samling · ${nf.format(list.length)} kort i potten</div></div>`;
+  const grid=$('tgrid'),cv=$('scr');const dpr=Math.min(devicePixelRatio||1,2);const W=grid.clientWidth,H=grid.clientHeight;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const cells=[...grid.querySelectorAll('.tf')].map(el=>({x:el.offsetLeft,y:el.offsetTop,w:el.offsetWidth,h:el.offsetHeight,el,hit:new Set(),open:false}));
+  const coat=c=>{const g=ctx.createLinearGradient(c.x,c.y,c.x+c.w,c.y+c.h);g.addColorStop(0,'#c9d2d9');g.addColorStop(.5,'#eef3f6');g.addColorStop(1,'#aab5bd');ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(c.x,c.y,c.w,c.h,10);ctx.fill();
+    ctx.fillStyle='rgba(60,80,95,.35)';ctx.font='700 11px Figtree, system-ui, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('SKRAPA',c.x+c.w/2,c.y+c.h/2-7);ctx.fillText('HÄR',c.x+c.w/2,c.y+c.h/2+8);};
+  cells.forEach(coat);
+  const G=8;let done=false;
+  const revealCell=c=>{if(c.open)return;c.open=true;ctx.clearRect(c.x-1,c.y-1,c.w+2,c.h+2);c.el.classList.add('open');check();};
+  const check=()=>{const wins=cells.filter((c,i)=>c.open&&fields[i]===pick);if(!done&&wins.length===3){done=true;cells.forEach((c,i)=>{if(fields[i]===pick)c.el.classList.add('win');});$('ovAct').hidden=true;$('ovHint').textContent='Tre lika!';later(()=>{cells.forEach(revealCell);finishOv(pick);},700);}
+    else if(!done){const pairs=new Set(fields.filter((f,i)=>cells[i].open&&f!==pick&&cells.filter((c,j)=>c.open&&fields[j]===f).length===2));
+      if(pairs.size&&wins.length<2)$('ovHint').textContent='Två lika… nästan!';else if(wins.length===2)$('ovHint').textContent='Två lika… en till?';}};
+  const scratch=(x,y)=>{ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(x,y,20,0,TAU);ctx.fill();ctx.globalCompositeOperation='source-over';
+    cells.forEach(c=>{if(c.open)return;for(let gx=0;gx<G;gx++)for(let gy=0;gy<G;gy++){const px=c.x+(gx+.5)*c.w/G,py=c.y+(gy+.5)*c.h/G;if((px-x)**2+(py-y)**2<400)c.hit.add(gx*G+gy);}
+      if(c.hit.size>G*G*.5)revealCell(c);});};
+  let down=false,last=null;const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height];};
+  cv.addEventListener('pointerdown',e=>{down=true;cv.setPointerCapture(e.pointerId);last=pos(e);scratch(...last);});
+  cv.addEventListener('pointermove',e=>{if(!down)return;const p=pos(e);const d=Math.hypot(p[0]-last[0],p[1]-last[1]),steps=Math.max(1,Math.ceil(d/8));for(let k=1;k<=steps;k++)scratch(last[0]+(p[0]-last[0])*k/steps,last[1]+(p[1]-last[1])*k/steps);last=p;});
+  ['pointerup','pointercancel'].forEach(ev=>cv.addEventListener(ev,()=>{down=false;}));
+  actBtn('Skrapa allt',()=>{cells.forEach(revealCell);});}
+function runQuickFallback(list,pick){commit(pick);}
+
+/* Boosterpack */
+function faceHTML(c){const [a,b]=TIERS[c.rarity]||['#45cdf3','#ff5a92'];return `<div class="face" style="--t1:${a};--t2:${b}"><div><div class="tier">${esc(c.rarity)}</div><h2>${esc(c.name)}</h2><div class="setline">${esc(c.set)} · ${esc(c.variant)}</div></div><div class="foot"><span>${esc(c.no)} · ${condAbbr[c.cond]}</span><b class="num">${money0.format(c.price)}</b></div></div>`;}
+function runPack(pick){openOv();$('ovHint').textContent='Tryck på paketet för att riva upp det';
+  $('stage').innerHTML=`<div class="packscene"><div class="pcard" id="pcard"><div class="pback"><span></span></div><div class="pfront">${faceHTML(pick)}</div></div>
+    <button class="pack" id="pack" type="button" aria-label="Öppna paketet"><span class="ptop"></span><span class="pbody"><img src="palafin.webp" alt=""><span class="pbrand">Oskars<br>Samling</span><span class="pset">1 kort · ${esc($('rr').value||'Alla rarities')}</span></span></button></div>`;
+  const pack=$('pack');pack.focus();
+  pack.addEventListener('click',()=>{if(pack.classList.contains('torn'))return;pack.classList.add('torn');$('ovHint').textContent='';
+    later(()=>$('pcard').classList.add('out'),550);
+    later(()=>{pack.classList.add('gone');},1100);
+    later(()=>$('pcard').classList.add('flip'),1500);
+    later(()=>finishOv(pick),2300);},{once:false});}
+$('rollBtn').addEventListener('click',roll);
+let clearArm=false;$('histClear').addEventListener('click',()=>{if(!clearArm){clearArm=true;$('histClear').textContent='Säker? Klicka igen';setTimeout(()=>{clearArm=false;$('histClear').textContent='Rensa';},3000);return;}history=[];saveHist();renderHist();clearArm=false;$('histClear').textContent='Rensa';});
+$('pickBtn').addEventListener('click',()=>{if(!current)return;chosen=chosen&&keyOf(chosen)===keyOf(current)?null:current;LS.set('pkChosen',chosen?keyOf(chosen):null);renderChosen();show(current);});
+$('showChosen').addEventListener('click',()=>chosen&&show(chosen));
+['rp','rr','rc','rmin'].forEach(id=>$(id).addEventListener('input',updPool));
+updPool();renderHist();renderChosen();
+show(chosen||[...cards].sort((a,b)=>b.price-a.price)[0]);
+
+
+/* ---------- ROUTER ---------- */
+const views=['start','samling','rarity','condition','slumpa'];
+function route(){const v=views.includes(location.hash.slice(1))?location.hash.slice(1):'start';
+  views.forEach(x=>$('v-'+x).hidden=x!==v);
+  document.querySelectorAll('nav.tabs a').forEach(a=>a.toggleAttribute('aria-current',false));
+  document.querySelector(`nav.tabs a[data-v="${v}"]`).setAttribute('aria-current','page');
+  if(v==='samling')renderTable();
+  window.scrollTo(0,0);}
+addEventListener('hashchange',route);route();
+</script>
+
+</body></html>
